@@ -31,6 +31,13 @@ class BynderRestClient {
         );
     }
 
+    public function test() {
+        $url = $this->baseRestUrl . '/media/?count=1';
+
+        $this->options[CURLOPT_URL] = $url;
+        var_dump($this->execute());
+    }
+
     protected function initCurl() {
         $curl = curl_init();
         foreach ($this->options as $option => $value) {

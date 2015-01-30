@@ -24,16 +24,16 @@ drupal_add_css('//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.cs
 function media_bynder_menu_local_tasks_alter(&$data, $router_item, $root_path)
 {
     // Add action link to 'file/add' on 'admin/content/file/thumbnails' page.
-    if ($root_path == 'admin/content/file' || $root_path == 'admin/content/file/thumbnails') {
-        $item = menu_get_item('admin/content/media/media_bynder/upload');
-        if (!empty($item['access'])) {
-            $data['actions']['output'][] = array(
-                '#theme' => 'menu_local_action',
-                '#link' => $item,
-                '#weight' => $item['weight']
-            );
-        }
-    }
+    // if ($root_path == 'admin/content/file' || $root_path == 'admin/content/file/thumbnails') {
+    //     $item = menu_get_item('admin/content/media/media_bynder/upload');
+    //     if (!empty($item['access'])) {
+    //         $data['actions']['output'][] = array(
+    //             '#theme' => 'menu_local_action',
+    //             '#link' => $item,
+    //             '#weight' => $item['weight']
+    //         );
+    //     }
+    // }
 }
 
 /**
@@ -182,18 +182,18 @@ function media_bynder_menu()
         // Will appear in Navigation menu.
         'type' => MENU_NORMAL_ITEM
     );
-    $items['media_bynder/upload']             = array(
-        'title' => 'Add Media to Bynder',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array(
-            'media_bynder_upload'
-        ),
-        'access arguments' => array(
-            'access media_bynder content'
-        ),
-        'file' => 'includes/media_bynder.upload.inc',
-        'weight' => -1
-    );
+    // $items['media_bynder/upload']             = array(
+    //     'title' => 'Add Media to Bynder',
+    //     'page callback' => 'drupal_get_form',
+    //     'page arguments' => array(
+    //         'media_bynder_upload'
+    //     ),
+    //     'access arguments' => array(
+    //         'access media_bynder content'
+    //     ),
+    //     'file' => 'includes/media_bynder.upload.inc',
+    //     'weight' => -1
+    // );
     $items['media/add/media_bynder']          = array(
         'title' => 'Add media from Bynder',
         'page callback' => 'drupal_get_form',
@@ -209,7 +209,7 @@ function media_bynder_menu()
     );
 
     $items['admin/content/media/add/media_bynder']    = $items['media/add/media_bynder'];
-    $items['admin/content/media/media_bynder/upload'] = $items['media_bynder/upload'];
+    //$items['admin/content/media/media_bynder/upload'] = $items['media_bynder/upload'];
 
     return $items;
 }

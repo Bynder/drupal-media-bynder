@@ -599,53 +599,53 @@ function media_bynder_form($form, &$form_state)
         '#required' => TRUE
     );
 
-    $form['media_bynder_upload_settings'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Bynder Upload settings'),
-        '#description' => t('Manage the configuration that will be used when you upload files to Bynder'),
-        '#collapsible' => TRUE
-    );
+    // $form['media_bynder_upload_settings'] = array(
+    //     '#type' => 'fieldset',
+    //     '#title' => t('Bynder Upload settings'),
+    //     '#description' => t('Manage the configuration that will be used when you upload files to Bynder'),
+    //     '#collapsible' => TRUE
+    // );
 
-    $form['media_bynder_upload_settings'][media_bynder_variable_name('autopublish')] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Auto publish'),
-        '#default_value' => media_bynder_variable_get('autopublish'),
-        '#size' => 50,
-        '#description' => t('When enabled files will be automatically published after processing.
-          If disabled a user will have to manually publish them using the
-          bynder media management software')
-    );
+    // $form['media_bynder_upload_settings'][media_bynder_variable_name('autopublish')] = array(
+    //     '#type' => 'checkbox',
+    //     '#title' => t('Auto publish'),
+    //     '#default_value' => media_bynder_variable_get('autopublish'),
+    //     '#size' => 50,
+    //     '#description' => t('When enabled files will be automatically published after processing.
+    //       If disabled a user will have to manually publish them using the
+    //       bynder media management software')
+    // );
 
-    $form['media_bynder_rights_settings']                                             = array(
-        '#type' => 'fieldset',
-        '#title' => t('Bynder Rights settings'),
-        '#description' => t('Manage rights and copyright notice for media from Bynder'),
-        '#collapsible' => TRUE
-    );
-    $form['media_bynder_rights_settings'][media_bynder_variable_name('rights_owner')] = array(
-        '#type' => 'textfield',
-        '#title' => t('Rights owner'),
-        '#default_value' => media_bynder_variable_get('rights_owner'),
-        '#size' => 50,
-        '#description' => t('The rights owner for media uploaded to Bynder.'),
-        '#required' => TRUE
-    );
-    $form['media_bynder_rights_settings'][media_bynder_variable_name('rights')]       = array(
-        '#type' => 'textfield',
-        '#title' => t('Rights'),
-        '#default_value' => media_bynder_variable_get('rights'),
-        '#size' => 50,
-        '#description' => t('The rights for using and ditributing the uploaded media.'),
-        '#required' => TRUE
-    );
-    $form['media_bynder_rights_settings'][media_bynder_variable_name('copyright')]    = array(
-        '#type' => 'textfield',
-        '#title' => t('Copyright Notice'),
-        '#default_value' => media_bynder_variable_get('copyright'),
-        '#size' => 50,
-        '#description' => t('Copyright notice for media uploaded to Bynder.'),
-        '#required' => TRUE
-    );
+    // $form['media_bynder_rights_settings']                                             = array(
+    //     '#type' => 'fieldset',
+    //     '#title' => t('Bynder Rights settings'),
+    //     '#description' => t('Manage rights and copyright notice for media from Bynder'),
+    //     '#collapsible' => TRUE
+    // );
+    // $form['media_bynder_rights_settings'][media_bynder_variable_name('rights_owner')] = array(
+    //     '#type' => 'textfield',
+    //     '#title' => t('Rights owner'),
+    //     '#default_value' => media_bynder_variable_get('rights_owner'),
+    //     '#size' => 50,
+    //     '#description' => t('The rights owner for media uploaded to Bynder.'),
+    //     '#required' => TRUE
+    // );
+    // $form['media_bynder_rights_settings'][media_bynder_variable_name('rights')]       = array(
+    //     '#type' => 'textfield',
+    //     '#title' => t('Rights'),
+    //     '#default_value' => media_bynder_variable_get('rights'),
+    //     '#size' => 50,
+    //     '#description' => t('The rights for using and ditributing the uploaded media.'),
+    //     '#required' => TRUE
+    // );
+    // $form['media_bynder_rights_settings'][media_bynder_variable_name('copyright')]    = array(
+    //     '#type' => 'textfield',
+    //     '#title' => t('Copyright Notice'),
+    //     '#default_value' => media_bynder_variable_get('copyright'),
+    //     '#size' => 50,
+    //     '#description' => t('Copyright notice for media uploaded to Bynder.'),
+    //     '#required' => TRUE
+    // );
 
     return system_settings_form($form);
 }

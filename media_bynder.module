@@ -1,0 +1,777 @@
+<?php
+
+/**
+ * @file
+ * A block module that displays recent blog and forum posts.
+ */
+
+/**
+ * load configuration settings
+ */
+include_once dirname(__FILE__) . '/includes/media_bynder.variables.inc';
+include_once dirname(__FILE__) . '/includes/media_bynder.utils.inc';
+
+// Hooks and callbacks for integrating with File Entity module for display.
+require_once dirname(__FILE__) . '/includes/media_bynder.formatters.inc';
+drupal_add_css(drupal_get_path('module', 'media_bynder') . '/media_bynder.css');
+drupal_add_css('//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css', array(
+  'type' => 'external'
+));
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function media_bynder_menu_local_tasks_alter(&$data, $router_item, $root_path)
+{
+    // Add action link to 'file/add' on 'admin/content/file/thumbnails' page.
+    if ($root_path == 'admin/content/file' || $root_path == 'admin/content/file/thumbnails') {
+        $item = menu_get_item('admin/content/media/media_bynder/upload');
+        if (!empty($item['access'])) {
+            $data['actions']['output'][] = array(
+                '#theme' => 'menu_local_action',
+                '#link' => $item,
+                '#weight' => $item['weight']
+            );
+        }
+    }
+}
+
+/**
+ * Implements hook_stream_wrappers().
+ */
+function media_bynder_stream_wrappers()
+{
+    return array(
+        'bynder' => array(
+            'name' => t('Bynder media'),
+            'class' => 'MediaBynderStreamWrapper',
+            'description' => t('Media provided by Bynder.'),
+            'type' => STREAM_WRAPPERS_READ_VISIBLE | STREAM_WRAPPERS_WRITE_VISIBLE
+        )
+    );
+}
+
+/**
+ * Implements hook_help().
+ *
+ * Displays help and module information.
+ */
+function media_bynder_help($path, $arg)
+{
+    switch ($path) {
+        case "admin/advanced_help#media_bynder":
+            return '<p>' . t("Advanced Help: Displays links to nodes created on this date") . '</p>';
+
+        case "admin/help#media_bynder":
+            return '<p>' . t("Help: Displays links to nodes created on this date") . '</p>';
+    }
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function media_bynder_block_info()
+{
+    $blocks['media_bynder'] = array(
+        // The name that will appear in the block list.
+        'info' => t('Bynder'),
+        // Default setting.
+        'cache' => DRUPAL_CACHE_PER_ROLE
+    );
+    return $blocks;
+}
+
+/**
+ * Custom content function.
+ *
+ * Set beginning and end dates, retrieve posts from database
+ * saved in that time period.
+ *
+ * @return array
+ *   A result set of the targeted posts.
+ */
+function media_bynder_contents($display)
+{
+    // $display argument is new.
+    // Get today's date.
+    $today      = getdate();
+    // Calculate midnight a week ago.
+    $start_time = mktime(0, 0, 0, $today['mon'], ($today['mday'] - 7), $today['year']);
+    // Get all posts from one week ago to the present.
+    $end_time   = time();
+    $max_num    = variable_get('media_bynder_max', 3);
+    // Use Database API to retrieve current posts.
+    // Published.
+    // Most recent first. Query paused here.
+    $query      = db_select('node', 'n')->fields('n', array(
+        'nid',
+        'title',
+        'created'
+    ))->condition('status', 1)->condition('created', array(
+        $start_time,
+        $end_time
+    ), 'BETWEEN')->orderBy('created', 'DESC');
+
+    if ($display == 'block') {
+        $query->range(0, $max_num);
+    }
+    // If called by page, query proceeds directly to execute().
+    return $query->execute();
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * Prepares the contents of the block.
+ */
+function media_bynder_block_view($delta = '')
+{
+    switch ($delta) {
+        case 'media_bynder':
+            $block['subject'] = t('Bynder');
+            if (user_access('access content')) {
+                // Use our custom function to retrieve data.
+                $result = media_bynder_contents('block');
+                // Array to contain items for the block to render.
+                $items  = array();
+                // Iterate over the resultset and format as links.
+                foreach ($result as $node) {
+                    $items[] = array(
+                        'data' => l($node->title, 'node/' . $node->nid)
+                    );
+                }
+                // No content in the last week.
+                if (empty($items)) {
+                    $block['content'] = t('No posts available.');
+                } else {
+                    // Pass data through theme function.
+                    $block['content'] = theme('item_list', array(
+                        'items' => $items
+                    ));
+                }
+            }
+            return $block;
+    }
+}
+
+/**
+ * Implements hook menu().
+ */
+function media_bynder_menu()
+{
+    $items                                    = array();
+    $items['admin/config/media/media_bynder'] = array(
+        'title' => 'Bynder Settings',
+        'description' => 'Configuration for media bynder module',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(
+            'media_bynder_form'
+        ),
+        'access arguments' => array(
+            'administer site configuration'
+        ),
+        'file' => 'includes/media_bynder.admin.inc',
+        'type' => MENU_NORMAL_ITEM
+    );
+    $items['media_bynder']                    = array(
+        'title' => 'Media',
+        'page callback' => '_media_bynder_page',
+        'access arguments' => array(
+            'access media_bynder content'
+        ),
+        // Will appear in Navigation menu.
+        'type' => MENU_NORMAL_ITEM
+    );
+    $items['media_bynder/upload']             = array(
+        'title' => 'Add Media to Bynder',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(
+            'media_bynder_upload'
+        ),
+        'access arguments' => array(
+            'access media_bynder content'
+        ),
+        'file' => 'includes/media_bynder.upload.inc',
+        'weight' => -1
+    );
+    $items['media/add/media_bynder']          = array(
+        'title' => 'Add media from Bynder',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(
+            'media_bynder_add'
+        ),
+        'access arguments' => array(
+            'administer site configuration'
+        ),
+        'type' => MENU_LOCAL_ACTION,
+        'file' => 'includes/media_bynder.admin.inc',
+        'weight' => -1
+    );
+
+    $items['admin/content/media/add/media_bynder']    = $items['media/add/media_bynder'];
+    $items['admin/content/media/media_bynder/upload'] = $items['media_bynder/upload'];
+
+    return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function media_bynder_permission()
+{
+    return array(
+        'access media_bynder content' => array(
+            'title' => t('Access content for the Media Tuur module')
+        )
+    );
+}
+
+/**
+ * Implements hook_media_browser_plugin_info().
+ */
+function media_bynder_media_browser_plugin_info()
+{
+    $info['bynder'] = array(
+        'title' => t('Bynder'),
+        'class' => 'MediaBynderBrowser'
+    );
+
+    return $info;
+}
+
+/**
+ * Custom page callback function, declared in current_posts_menu().
+ */
+function _media_bynder_page()
+{
+    $result = media_bynder_contents('page');
+    // Array to contain items for the page to render.
+    $items  = array();
+    // Iterate over the resultset and format as links.
+    foreach ($result as $node) {
+        $items[] = array(
+            'data' => l($node->title, 'node/' . $node->nid)
+        );
+    }
+
+    // No content in the last week.
+    if (empty($items)) {
+        $page_array['media_bynder_arguments'] = array(
+            // Title serves as page subtitle.
+            '#title' => t('All posts from the last week'),
+            '#markup' => t('No posts available.')
+        );
+        return $page_array;
+    } else {
+        $page_array['media_bynder_arguments'] = array(
+            '#title' => t('All posts from the last week'),
+            '#items' => $items,
+            // Theme hook with suggestion.
+            '#theme' => 'item_list__media_bynder'
+        );
+        return $page_array;
+    }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This alter enhances the default admin/content/file page making modifications
+ *  to the thumbnail view by replacing the existing
+ * checkboxes and table with thumbnails.
+ */
+function media_bynder_form_file_entity_edit_alter(&$form, $form_state)
+{
+    // Not implemented.
+}
+
+function media_bynder_form_file_entity_add_upload_alter(&$form, $form_state)
+{
+    if ($form['#step'] == 1) {
+        $form['bynder_upload'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Upload file to Bynder'),
+            '#default_value' => media_bynder_variable_get('upload_choice', FALSE)
+        );
+
+        $form['title'] = array(
+            '#name' => 'title',
+            '#type' => 'textfield',
+            '#title' => t('Title of the media object(s)'),
+            '#size' => 22,
+            '#states' => array(
+                'visible' => array(
+                    ':input[name="bynder_upload"]' => array(
+                        'checked' => TRUE
+                    )
+                )
+            )
+        );
+
+        $form['description'] = array(
+            '#name' => 'description',
+            '#type' => 'textarea',
+            '#title' => t('Description of the media object(s)'),
+            '#states' => array(
+                'visible' => array(
+                    ':input[name="bynder_upload"]' => array(
+                        'checked' => TRUE
+                    )
+                )
+            )
+        );
+        $form['keywords']    = array(
+            '#name' => 'keywords',
+            '#type' => 'textarea',
+            '#title' => t('Keywords'),
+            '#description' => t('Enter multiple keywords separated by a comma (,)'),
+            '#states' => array(
+                'visible' => array(
+                    ':input[name="bynder_upload"]' => array(
+                        'checked' => TRUE
+                    )
+                )
+            )
+        );
+
+        $form['#validate'][] = 'media_bynder_add_file_entity_validate';
+        $form['#submit'][]   = 'media_bynder_add_file_entity_submit';
+    }
+
+    if ($form['#step'] == 3) {
+        if ($form_state['values']['bynder_upload'] == 1) {
+            $form['scheme']['#default_value'] = 'bynder';
+            unset($form['scheme']['#options']['public']);
+        }
+    }
+}
+
+function media_bynder_add_file_entity_validate($form, &$form_state)
+{
+    if ($form_state['values']['bynder_upload'] == 1) {
+        module_load_include('inc', 'media_bynder', 'includes/media_bynder.upload');
+
+        $upload = $form_state['values']['upload'];
+        $upload = file_load($upload);
+        $url    = file_create_url($upload->uri);
+        $url    = str_replace('http://' . $_SERVER['HTTP_HOST'], '', $url);
+        $url    = $_SERVER['DOCUMENT_ROOT'] . $url;
+
+        $filename      = $upload->filename;
+        $info          = pathinfo($filename);
+        $filename      = str_replace('.' . $info['extension'], '', $filename);
+        $metadata_file = '/tmp/' . $filename . '.xml';
+        $metadata      = media_bynder_build_metadata($form_state['values']);
+        media_bynder_generate_metadata($metadata_file, $metadata);
+
+        $result = media_bynder_rest_client()->upload($url, $metadata_file, media_bynder_variable_get("ingestspace_id"));
+        $result = json_decode($result);
+
+        if ($result) {
+            $form_state['storage']['fragmentid'] = $result->fragmentId;
+        } else {
+            form_set_error('bynder_upload', t('Error processing file to Bynder. This file could already exists.'));
+        }
+    }
+}
+
+function media_bynder_add_file_entity_submit($form, &$form_state)
+{
+    if ($form_state['values']['bynder_upload'] == 1) {
+        $fragmentid = $form_state['storage']['fragmentid'];
+
+        //Alter the file
+        $fid  = $form_state['values']['upload'];
+        $file = file_load($fid);
+
+        $uri       = file_stream_wrapper_uri_normalize("bynder://f/" . $fragmentid);
+        $file->uri = $uri;
+
+        file_save($file);
+    }
+}
+
+/**
+ * Implements hook form_file_entity_admin_file_alter().
+ */
+function media_bynder_form_file_entity_admin_file_alter(&$form, $form_state)
+{
+    if (!empty($form_state['values']['operation'])) {
+        // The form is being rebuilt because an operation requiring confirmation
+        // We don't want to be messing with it in this case.
+        return;
+    }
+
+    if (arg(3) == 'thumbnails') {
+
+        if (empty($form['admin']['files'])) {
+            // Display empty text if there are no files.
+            $form['admin']['files'] = array(
+                '#markup' => '<p>' . $form['files']['#empty'] . '</p>'
+            );
+        } else {
+            $files = file_load_multiple(array_keys($form['admin']['files']));
+
+            $form['admin']['files'] = array(
+                '#tree' => TRUE,
+                '#prefix' => '<div class="media-display-thumbnails media-clear clearfix"><ul id="media-browser-library-list" class="media-list-thumbnails">',
+                '#suffix' => '</ul></div>'
+            );
+
+            foreach ($files as $file) {
+                if (strstr($file->uri, 'bynder://')) {
+                    $preview = media_bynder_get_thumbnail_preview($file, TRUE);
+                } else {
+                    $preview = media_get_thumbnail_preview($file, TRUE);
+                }
+                $form['admin']['files'][$file->fid] = array(
+                    '#type' => 'checkbox',
+                    '#title' => '',
+                    '#prefix' => '<li>' . drupal_render($preview),
+                    '#suffix' => '</li>'
+                );
+            }
+        }
+    }
+}
+
+/**
+ * Retrieve the thumbnail for a file.
+ */
+function media_bynder_get_thumbnail_preview($file, $link = NULL)
+{
+    // If a file has an invalid type, allow file_view_file() to work.
+    if (!file_type_is_enabled($file->type)) {
+        $file->type = file_get_type($file);
+    }
+
+    $preview                      = file_view_file($file, 'preview');
+    $preview['#show_names']       = TRUE;
+    $preview['#add_link']         = $link;
+    $preview['#theme_wrappers'][] = 'media_bynder_thumbnail';
+
+    return $preview;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function media_bynder_theme($existing, $type, $theme, $path)
+{
+    return array(
+        // The default media file list form element.
+        'media_file_list' => array(
+            'variables' => array(
+                'element' => NULL
+            )
+        ),
+        // A preview of the uploaded file.
+        'media_bynder_thumbnail' => array(
+            'render element' => 'element',
+            'file' => 'includes/media_bynder.theme.inc'
+        ),
+        'media_bynder_video' => array(
+            'variables' => array(
+                'uri' => NULL,
+                'options' => array()
+            ),
+            'file' => 'media_bynder.theme.inc',
+            'path' => $path . '/includes',
+            'template' => 'media-bynder-video'
+        )
+    );
+}
+
+/**
+ * Provides a form for adding media items from Bynder search.
+ */
+function media_bynder_browser_add($form, &$form_state = array())
+{
+    module_load_include('inc', 'media', 'includes/media.browser');
+
+    // Our search term can come from the form, or from the pager.
+    $term            = isset($form_state['values']['search']) ? $form_state['values']['search'] : (isset($_GET['search']) ? $_GET['search'] : '');
+    $tagsearch       = isset($form_state['values']['facet_search']) ? $form_state['values']['facet_search'] : (isset($_GET['facet_search']) ? $_GET['facet_search'] : '');
+    $tagsearchstring = '';
+
+    if (!empty($tagsearch)) {
+        $tagsearch       = explode("\n", $tagsearch);
+        $tagsearchstring = array();
+
+        foreach ($tagsearch as $tag) {
+            $tagsearchstring[] = '+(' . $tag . ')';
+        }
+
+        $tagsearchstring = implode(' ', $tagsearchstring);
+    }
+
+    $selected = isset($form_state['values']['facet_selected']) ? $form_state['values']['facet_selected'] : (isset($_GET['facet_selected']) ? $_GET['facet_selected'] : '');
+
+    if (!empty($selected)) {
+        $selected = explode("\n", $selected);
+    }
+
+    $form['search'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Search'),
+        '#description' => t('Input a phrase or tags to search.'),
+        '#default_value' => $term
+    );
+
+    //Show selected facets
+    if (!empty($selected)) {
+        $markup = '';
+        foreach ($selected as $index => $selectedterm) {
+            $markup .= l($selectedterm, '<front>', array(
+                'attributes' => array(
+                    'class' => array(
+                        'facetdeletelink'
+                    ),
+                    'data' => $index
+                )
+            )) . '<br />';
+        }
+
+        $markup                 = '<strong>' . t('You have filtered on') . ':</strong><br />' . $markup;
+        $form['facetsselected'] = array(
+            '#markup' => $markup
+        );
+    }
+
+    $form['facet_selected'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Facet selected'),
+        '#default_value' => $selected,
+        '#prefix' => '<div style="display: none;">',
+        '#suffix' => '</div>'
+    );
+
+    $form['facet_search'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Facet search'),
+        '#default_value' => $tagsearch,
+        '#prefix' => '<div style="display: none;">',
+        '#suffix' => '</div>'
+    );
+
+
+    if (!isset($form_state['values']['facet_search'])) {
+        $facets = json_decode(media_bynder_rest_client()->getFacets('*'));
+    } else {
+        $facets = json_decode(media_bynder_rest_client()->getFacets($tagsearchstring));
+    }
+
+    if (isset($facets->facet) && is_array($facets->facet)) {
+        $first = TRUE;
+
+        foreach ($facets->facet as $facet) {
+            $name  = $facet->name;
+            $title = $facet->title;
+            $tags  = array();
+
+            foreach ($facet->value as $tag) {
+                $tags[] = l(sprintf('%s (%d)', $tag->label, $tag->count), $tag->atom, array(
+                    'attributes' => array(
+                        'class' => array(
+                            'facetlink'
+                        ),
+                        'data' => $tag->label
+                    )
+                ));
+            }
+
+            if (!empty($tags)) {
+                $form["fieldset_{$name}"] = array(
+                    '#type' => 'fieldset',
+                    '#title' => $title,
+                    '#collapsible' => TRUE,
+                    '#collapsed' => ($first ? FALSE : TRUE)
+                );
+
+                $form["fieldset_{$name}"]['tags'] = array(
+                    '#markup' => theme('item_list', array(
+                        'items' => $tags
+                    ))
+                );
+            }
+
+            $first = FALSE;
+        }
+    }
+
+    $form['apply'] = array(
+        '#type' => 'button',
+        '#value' => t('Apply')
+    );
+
+    // This is our half-assed pager.
+    $page = isset($_GET['page-yt']) ? $_GET['page-yt'] : 0;
+    if (isset($form_state['values']['search'])) {
+        // Reset the pager when we press apply.
+        $page = 0;
+    }
+
+    if (!empty($tagsearchstring)) {
+        $search = json_decode(media_bynder_rest_client()->search(urldecode($tagsearchstring), $page * 15, 15), TRUE);
+    }
+
+    if (!empty($term)) {
+        $search = json_decode(media_bynder_rest_client()->search($term, $page * 15, 15), TRUE);
+    }
+
+    $empty = FALSE;
+    $files = array();
+    if (!isset($search) || !isset($search['totalNrOfResults']) || $search['totalNrOfResults'] == 0) {
+        $empty = TRUE;
+    } else {
+        foreach ($search['mediaDataList'] as $media) {
+
+            // Create a temporary file object for our retrieved video.
+            $file = media_bynder_mediadata_to_file($media);
+
+            if (!isset($file->fid)) {
+                $file->fid = 0;
+            }
+            $uri = $file->uri;
+
+            media_browser_build_media_item($file);
+
+            $file->preview       = l($file->preview, 'media/browser', array(
+                'html' => TRUE,
+                'attributes' => array(
+                    'data-uri' => $uri
+                ),
+                'query' => array(
+                    'render' => 'media-popup',
+                    'uri' => $uri
+                )
+            ));
+            $form['media'][$uri] = array(
+                '#markup' => $file->preview,
+                '#prefix' => '<li>',
+                '#suffix' => '</li>'
+            );
+            $files[$uri]         = $file;
+        }
+    }
+
+    if (!count($files)) {
+        $empty = TRUE;
+    }
+
+    if ($empty) {
+        $form['empty'] = array(
+            '#markup' => '<div class="empty-message">' . t('No media match your search criteria. Please try again.') . '</div>'
+        );
+    }
+
+    $query = $_GET;
+    if ($term !== '') {
+        $query['search'] = $term;
+    }
+
+    if (!empty($tagsearchstring)) {
+        $query['facet_search'] = $tagsearchstring;
+    }
+
+    $dest = $query['q'];
+    unset($query['q']);
+    $prev = $next = '';
+    if ($page) {
+        $query['page-yt'] = $page - 1;
+        $prev             = l(t('previous'), $dest, array(
+            'query' => $query
+        ));
+    }
+    $query['page-yt'] = $page + 1;
+    if (!$empty && $search['totalNrOfResults'] > ($page + 1) * 15) {
+        $next = l(t('next'), $dest, array(
+            'query' => $query
+        ));
+    }
+
+    $form['submitted-media'] = array(
+        '#type' => 'hidden',
+        '#default_value' => FALSE
+    );
+
+    // Add the files to JS so that they are accessible inside the browser.
+    drupal_add_js(array(
+        'media' => array(
+            'files' => $files
+        )
+    ), 'setting');
+
+    // Add media browser javascript and CSS.
+    drupal_add_js(drupal_get_path('module', 'media_bynder') . '/js/media-bynder.browser.js');
+
+    $form['actions']           = array(
+        '#type' => 'actions'
+    );
+    $form['actions']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Submit')
+    );
+
+    $form['media']['#prefix'] = '<div id="container">';
+    if (isset($search) && $search['totalNrOfResults'] > 0) {
+        $form['media']['#prefix'] .= '<div>' . t('Number of results:') . ' ' . $search['totalNrOfResults'] . '<span style="float:right">' . $prev . ' ' . $next . '</span></div>';
+    }
+    $form['media']['#prefix'] .= '<div id="scrollbox"><ul id="media-browser-library-list" class="media-list-thumbnails">';
+    $form['media']['#suffix'] = '</ul><div id="status"></div></div></div>';
+    return $form;
+}
+
+/**
+ * Submit the selected media file.
+ *
+ * @param unknown $form
+ *   the form
+ * @param unknown $form_state
+ *   formstate
+ */
+function media_bynder_browser_add_submit($form, &$form_state)
+{
+    $uri = $form_state['values']['submitted-media'];
+    try {
+        // Save the remote file.
+        $file = file_uri_to_object($uri, TRUE);
+
+        if (!$file->fid) {
+            $fragment_id = media_bynder_uri_parse_fragmentid($uri);
+            $media_data  = media_bynder_rest_client()->getMediaObject($fragment_id);
+            $file        = media_bynder_mediadata_to_file(json_decode($media_data, TRUE));
+            file_save($file);
+        }
+    }
+    catch (Exception $e) {
+        form_set_error('url', $e->getMessage());
+        return;
+    }
+
+    if (!$file->idHash) {
+        form_set_error('url', t('The file %file could not be saved. An unknown error has occurred.', array(
+            '%file' => $uri
+        )));
+        return;
+    } else {
+        $form_state['file'] = $file;
+    }
+}
+
+/**
+ * Before saving the file.
+ *
+ * @param unknown $file
+ *   the file
+ */
+function media_bynder_file_presave($file)
+{
+    if (stristr($file->uri, 'bynder://')) {
+        if (($file->type) == 'image') {
+            $file->filemime = 'image/bynder';
+        } elseif (($file->type) == 'video') {
+            $file->filemime = 'video/bynder';
+        }
+    }
+}

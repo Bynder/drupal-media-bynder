@@ -37,3 +37,21 @@ function media_bynder_embed_url($fragment_id, $type){
 
     return $base_url;
 }
+
+
+/**
+ * Parse the style out of the uri.
+ */
+function media_bynder_uri_parse_style_url($uri) {
+    $target = file_uri_target($uri);
+    $parts = explode('/', $target);
+    if(isset($parts[1]) && isset($parts[4]) && isset($parts[6])){
+        return array(
+            "style" => $parts[1],
+            "f" => $parts[4],
+            "i" => $parts[6]
+        );
+    }else{
+        return FALSE;
+    }
+}

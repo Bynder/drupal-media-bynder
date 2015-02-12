@@ -14,6 +14,10 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
         if ($parameters = $this->get_parameters()) {
             return media_bynder_embed_url($parameters['i']);
         } else {
+            $parameters = media_bynder_uri_parse_style_url($this->uri);
+            if($parameters){
+                return media_bynder_embed_url($parameters['i'], $parameters['style']);
+            }
             return FALSE;
         }
     }
@@ -42,26 +46,4 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
         return $url;
     }
 
-    // /**
-    //  * Determine thumbnail path.
-    //  * @return string
-    //  *   Path to thumbnail.
-    //  */
-    // public function getLocalThumbnailPath()
-    // {
-    //     $parts = $this->get_parameters();
-
-    //     $local_path = file_default_scheme() . '://todo/' . check_plain($parts['f']) . '.jpg';
-    //     if (!file_exists($local_path)) {
-    //         $dirname = drupal_dirname($local_path);
-    //         file_prepare_directory($dirname, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-    //         $response = drupal_http_request($this->getOriginalThumbnailPath());
-    //         if (!isset($response->error)) {
-    //             file_unmanaged_save_data($response->data, $local_path, TRUE);
-    //         } else {
-    //             @copy($this->getOriginalThumbnailPath(), $local_path);
-    //         }
-    //     }
-    //     return $local_path;
-    // }
 }

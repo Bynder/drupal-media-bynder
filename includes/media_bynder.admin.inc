@@ -44,7 +44,8 @@ function media_bynder_generate_search($state)
     $data['search'] = array(
         '#type' => 'textfield',
         '#title' => t('Search'),
-        '#default_value' => $search !== NULL ? $search : ''
+        '#default_value' => $search !== NULL ? $search : '',
+        '#description' => "<p class='alert alert-warning' style='display:none'><span class='text'></span></p>",
     );
 
     $data['facets'] = media_bynder_generate_facets($available_facets, $selected_facets, $brands);
@@ -450,8 +451,10 @@ function media_bynder_generate_result_current($media_item)
     return l('<div class="image-holder"><img src="' . $media_item['thumbnails']['thul'] . '"/></div>
       <span class="media_object_type_' . $media_item['type'] . '">' . t($media_item['name']) . '</span>', 'admin/content/media/add/media_bynder/', array(
         'attributes' => array(
-            'class' => 'anchor-class',
-            'rel' => $media_item['id'] //fragmentId
+            'class' => 'bynder-image',
+            'rel' => $media_item['id'],
+            'data-id' => $media_item['id'],
+            'data-idHash' => $media_item['idHash'] //fragmentId
         ),
         'html' => TRUE,
         'query' => array(
@@ -496,8 +499,8 @@ function media_bynder_submit_mob(&$form, &$form_state)
     if ($result) {
         $arr_json = json_decode($result, TRUE);
     } else {
-        drupal_set_message($rest_client->error, 'error');
-        return FALSE;
+        echo '{"success": 0, "type": "error", "message": "' . $rest_client->error . '"}';
+        exit;
     }
 
     $uri  = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
@@ -513,33 +516,25 @@ function media_bynder_submit_mob(&$form, &$form_state)
     $file->filename = $arr_json['name'];
 
     if ($file === FALSE) {
-        drupal_set_message(t('An error occurred and no file was saved.'), 'error');
-        $redirect = "media_bynder_add";
+        echo '{"success": 0, "type": "error", "message": "' . t('An error occurred and no file was added to your Library.') . '"}';
     } elseif (!property_exists($file, 'fid')) {
         $file = file_save($file);
-
-        if (module_exists('overlay') && path_is_admin($_GET['q'])) {
-            // The overlay is visualized.
-        } else {
-            $redirect = "media/{$file->fid}/edit";
-        }
 
         field_attach_submit('media', $file, $form, $form_state);
         // Make a copy of the file object to use as the media object
         // (file is a field of media and the base table). This is weird.
-        $file->file                   = array();
-        $file->file[LANGUAGE_NONE]    = array();
+        $file->file = array();
+        $file->file[LANGUAGE_NONE] = array();
         $file->file[LANGUAGE_NONE][0] = (array) $file + array(
             'display' => TRUE
         );
-        $file->is_new                 = TRUE;
+        $file->is_new = TRUE;
         field_attach_insert('media', $file);
-        drupal_set_message(t('Successfully added media'));
+        echo '{"success": 1, "type": "success", "message": "' . t('Successfully added media to Library') . '"}';
     } else {
-        drupal_set_message(t('Already exists'), 'warning');
+        echo '{"success": 0, "type": "warning", "message": "' . t('Already exists in Library') . '"}';
     }
-    $form_state['values']['redirect'] = $redirect;
-    $form['#attributes']['target']    = '_parent';
+    exit;
 }
 
 /**
@@ -598,54 +593,6 @@ function media_bynder_form($form, &$form_state)
         '#description' => t('The token secret to be used by the module to communicate with Bynder.'),
         '#required' => TRUE
     );
-
-    // $form['media_bynder_upload_settings'] = array(
-    //     '#type' => 'fieldset',
-    //     '#title' => t('Bynder Upload settings'),
-    //     '#description' => t('Manage the configuration that will be used when you upload files to Bynder'),
-    //     '#collapsible' => TRUE
-    // );
-
-    // $form['media_bynder_upload_settings'][media_bynder_variable_name('autopublish')] = array(
-    //     '#type' => 'checkbox',
-    //     '#title' => t('Auto publish'),
-    //     '#default_value' => media_bynder_variable_get('autopublish'),
-    //     '#size' => 50,
-    //     '#description' => t('When enabled files will be automatically published after processing.
-    //       If disabled a user will have to manually publish them using the
-    //       bynder media management software')
-    // );
-
-    // $form['media_bynder_rights_settings']                                             = array(
-    //     '#type' => 'fieldset',
-    //     '#title' => t('Bynder Rights settings'),
-    //     '#description' => t('Manage rights and copyright notice for media from Bynder'),
-    //     '#collapsible' => TRUE
-    // );
-    // $form['media_bynder_rights_settings'][media_bynder_variable_name('rights_owner')] = array(
-    //     '#type' => 'textfield',
-    //     '#title' => t('Rights owner'),
-    //     '#default_value' => media_bynder_variable_get('rights_owner'),
-    //     '#size' => 50,
-    //     '#description' => t('The rights owner for media uploaded to Bynder.'),
-    //     '#required' => TRUE
-    // );
-    // $form['media_bynder_rights_settings'][media_bynder_variable_name('rights')]       = array(
-    //     '#type' => 'textfield',
-    //     '#title' => t('Rights'),
-    //     '#default_value' => media_bynder_variable_get('rights'),
-    //     '#size' => 50,
-    //     '#description' => t('The rights for using and ditributing the uploaded media.'),
-    //     '#required' => TRUE
-    // );
-    // $form['media_bynder_rights_settings'][media_bynder_variable_name('copyright')]    = array(
-    //     '#type' => 'textfield',
-    //     '#title' => t('Copyright Notice'),
-    //     '#default_value' => media_bynder_variable_get('copyright'),
-    //     '#size' => 50,
-    //     '#description' => t('Copyright notice for media uploaded to Bynder.'),
-    //     '#required' => TRUE
-    // );
 
     return system_settings_form($form);
 }

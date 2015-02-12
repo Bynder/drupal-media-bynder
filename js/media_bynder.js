@@ -35,7 +35,7 @@
             var idHash = $image.attr('data-idHash');
 
             $.ajax({
-                url: '/admin/content/media/add/media_bynder',
+                url: '/?q=admin/content/media/add/media_bynder',
                 type: 'POST',
                 dataType: 'json',
                 data: {

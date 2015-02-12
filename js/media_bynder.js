@@ -36,7 +36,7 @@
 
             $.ajax({
                 url: '/admin/content/media/add/media_bynder',
-                type: 'GET',
+                type: 'POST',
                 dataType: 'json',
                 data: {
                     id: id,

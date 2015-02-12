@@ -16,7 +16,7 @@ include_once 'media_bynder.variables.inc';
 function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     module_load_include('inc', 'media', 'includes/media.browser');
 
-    $id = media_bynder_parameter($_GET, 'id');
+    $id = media_bynder_parameter($_POST, 'id');
     if ($id !== NULL) {
         media_bynder_submit_mob($form, $form_state);
         return;
@@ -488,8 +488,8 @@ function media_bynder_generate_pager($num_results, $element = 0, $parameters = a
  */
 function media_bynder_submit_mob(&$form, &$form_state)
 {
-    $id = media_bynder_parameter($_GET, 'id');
-    $idHash = media_bynder_parameter($_GET, 'idHash');
+    $id = media_bynder_parameter($_POST, 'id');
+    $idHash = media_bynder_parameter($_POST, 'idHash');
 
     $redirect = 'media_bynder_add';
 

@@ -27,8 +27,7 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
      * @return string
      *   The path to the thumbnail.
      */
-    public function getOriginalThumbnailPath()
-    {
+    public function getOriginalThumbnailPath() {
         $parts = $this->get_parameters();
         $url = media_bynder_embed_url($parts['i'], 'thul');
         return $url;
@@ -39,8 +38,7 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
      * @return string
      *   The path to the thumbnail.
      */
-    public function getWebimagePath()
-    {
+    public function getWebimagePath() {
         $parts = $this->get_parameters();
         $url = media_bynder_embed_url($parts['i'], 'web');
         return $url;

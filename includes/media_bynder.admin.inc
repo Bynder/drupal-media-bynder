@@ -30,8 +30,7 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
 /**
  * Generate search page.
  */
-function media_bynder_generate_search($state)
-{
+function media_bynder_generate_search($state) {
     $data = array('#type' => 'fieldset');
 
     $brands = media_bynder_brands();
@@ -80,8 +79,7 @@ function media_bynder_generate_search($state)
 /**
  * Retrieve parameter from container.
  */
-function media_bynder_parameter($container, $key, $default = NULL)
-{
+function media_bynder_parameter($container, $key, $default = NULL) {
     if (isset($container[$key])) {
         return $container[$key];
     }
@@ -91,8 +89,7 @@ function media_bynder_parameter($container, $key, $default = NULL)
 /**
  * Return entered search string.
  */
-function media_bynder_search_string($state)
-{
+function media_bynder_search_string($state) {
     $search = NULL;
 
     if (isset($state['values']['search'])) {
@@ -141,8 +138,7 @@ function media_bynder_selected_facets($state) {
 /**
  * Search with selected facets and a search term.
  */
-function media_bynder_search_facets($selected_facets, $search_term)
-{
+function media_bynder_search_facets($selected_facets, $search_term) {
     $full_query = "";
     foreach ($selected_facets as $selected_facet_group_name => $selected_facet_group) {
         $full_query .= "&" . $selected_facet_group_name . '=' . implode(",", $selected_facet_group);
@@ -169,8 +165,7 @@ function media_bynder_search_facets($selected_facets, $search_term)
 /**
  * Parse the selected facets.
  */
-function media_bynder_parse_selected_facets($selected_facets)
-{
+function media_bynder_parse_selected_facets($selected_facets) {
     if (!$selected_facets) {
         return FALSE;
     }
@@ -234,7 +229,7 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands) {
             'orientation' => 'image'
         );
         $facet_category = array(
-            'data' => "<span><i class='fa fa-" . $icons[$facet_category_name] . "'></i> " . $labels[$facet_category_name] . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
+            'data' => "<span><i class='fa fa-" . filter_xss($icons[$facet_category_name]) . "'></i> " . filter_xss($labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
             'id' => $facet_category_name,
             'class' => array(
                 'facet_title'
@@ -266,8 +261,8 @@ function media_bynder_generate_facets_link($facet_category, $facet_category_name
         $active_class = $active ? "active" : "";
         $href_link = ($active)? $deactivate_href_link : $activate_href_link;
         $link = "";
-        $link .= '<a class="' . $active_class . '" href="?' . $href_link . '">' . htmlentities($facet_name) . '</a>';
-        $link .= '<span class="count">(' . $facet_count . ')</span>';
+        $link .= '<a class="' . filter_xss($active_class) . '" href="?' . filter_xss($href_link) . '">' . filter_xss($facet_name) . '</a>';
+        $link .= '<span class="count">(' . filter_xss($facet_count) . ')</span>';
         $facet_links[] = $link;
     }
     return $facet_links;
@@ -313,8 +308,7 @@ function media_bynder_facet_active($selected_facets, $current_facet){
 /**
  * Parse the facet link.
  */
-function media_bynder_parse_facet_link($query)
-{
+function media_bynder_parse_facet_link($query) {
     $pattern = '/\+\([A-Za-z0-9 ]*\)/';
     preg_match($pattern, $query, $matches);
     $query = urlencode($query);
@@ -325,8 +319,7 @@ function media_bynder_parse_facet_link($query)
     return $query;
 }
 
-function media_bynder_remove_hidden_facets($available_facets, $selected_facets)
-{
+function media_bynder_remove_hidden_facets($available_facets, $selected_facets) {
     foreach($selected_facets as $selected_facet_key => $selected_facet){
         $value = $selected_facet[0];
         $isset = isset($available_facets[$selected_facet_key][$value]);
@@ -364,15 +357,14 @@ function media_bynder_brands() {
  * @return mixed
  *   the search results.
  */
-function media_bynder_search_results($search, $selected_facets)
-{
+function media_bynder_search_results($search, $selected_facets) {
     $start_index = 0;
     $nr_of_results = 25;
     $query = '';
 
     if (isset($_GET['page'])) {
         $current_page = (int) filter_xss($_GET['page']);
-        $start_index  = $current_page * $nr_of_results;
+        $start_index = $current_page * $nr_of_results;
     }
 
     if (isset($selected_facets)) {
@@ -405,8 +397,7 @@ function media_bynder_search_results($search, $selected_facets)
 /**
  * Organize results from search engine to visualize them.
  */
-function media_bynder_generate_results($results)
-{
+function media_bynder_generate_results($results) {
     if (isset($results['totalNrOfResults'])) {
         unset($results['totalNrOfResults']);
     }
@@ -439,14 +430,13 @@ function media_bynder_generate_results($results)
 /**
  * Show search result.
  */
-function media_bynder_generate_result_current($media_item)
-{
+function media_bynder_generate_result_current($media_item) {
     if (!isset($media_item['thumbnails']['thul'])) {
         return FALSE;
     }
 
-    $variables           = array();
-    $variables['path']   = $media_item['thumbnails']['thul'];
+    $variables = array();
+    $variables['path'] = $media_item['thumbnails']['thul'];
 
     return l('<div class="image-holder"><img src="' . $media_item['thumbnails']['thul'] . '"/></div>
       <span class="media_object_type_' . $media_item['type'] . '">' . t($media_item['name']) . '</span>', 'admin/content/media/add/media_bynder/', array(
@@ -467,8 +457,7 @@ function media_bynder_generate_result_current($media_item)
 /**
  * Generate paging functionality.
  */
-function media_bynder_generate_pager($num_results, $element = 0, $parameters = array())
-{
+function media_bynder_generate_pager($num_results, $element = 0, $parameters = array()) {
     if (isset($_POST['search'])) {
         $_GET['search'] = filter_xss(check_plain($_POST['search']));
     }
@@ -486,8 +475,7 @@ function media_bynder_generate_pager($num_results, $element = 0, $parameters = a
 /**
  * Submit the selected media object.
  */
-function media_bynder_submit_mob(&$form, &$form_state)
-{
+function media_bynder_submit_mob(&$form, &$form_state) {
     $id = media_bynder_parameter($_POST, 'id');
     $idHash = media_bynder_parameter($_POST, 'idHash');
 
@@ -503,13 +491,11 @@ function media_bynder_submit_mob(&$form, &$form_state)
         exit;
     }
 
-    $uri  = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
+    $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
     $file = file_uri_to_object($uri, TRUE);
 
     if ($arr_json['type'] == 'image') {
         $file->filemime = 'image/jpeg';
-    } elseif ($arr_json['type'] == 'video') {
-        $file->filemime = 'video/mp4';
     }
 
     $file->filesize = @filesize($uri);
@@ -519,10 +505,7 @@ function media_bynder_submit_mob(&$form, &$form_state)
         echo '{"success": 0, "type": "error", "message": "' . t('An error occurred and no file was added to your Library.') . '"}';
     } elseif (!property_exists($file, 'fid')) {
         $file = file_save($file);
-
         field_attach_submit('media', $file, $form, $form_state);
-        // Make a copy of the file object to use as the media object
-        // (file is a field of media and the base table). This is weird.
         $file->file = array();
         $file->file[LANGUAGE_NONE] = array();
         $file->file[LANGUAGE_NONE][0] = (array) $file + array(
@@ -542,8 +525,7 @@ function media_bynder_submit_mob(&$form, &$form_state)
  *
  * @see current_posts_menu()
  */
-function media_bynder_form($form, &$form_state)
-{
+function media_bynder_form($form, &$form_state) {
     $form['media_bynder_settings'] = array(
         '#type' => 'fieldset',
         '#title' => t('Bynder API'),
@@ -551,7 +533,7 @@ function media_bynder_form($form, &$form_state)
         '#collapsible' => TRUE
     );
 
-    $form['media_bynder_settings'][media_bynder_variable_name('url')]                   = array(
+    $form['media_bynder_settings'][media_bynder_variable_name('url')] = array(
         '#type' => 'textfield',
         '#title' => t('Bynder url'),
         '#default_value' => media_bynder_variable_get('url'),
@@ -559,7 +541,7 @@ function media_bynder_form($form, &$form_state)
         '#description' => t('The Bynder url.'),
         '#required' => TRUE
     );
-    $form['media_bynder_settings'][media_bynder_variable_name('oauth_consumer')]        = array(
+    $form['media_bynder_settings'][media_bynder_variable_name('oauth_consumer')] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Consumer Token'),
         '#default_value' => media_bynder_variable_get('oauth_consumer'),
@@ -600,36 +582,18 @@ function media_bynder_form($form, &$form_state)
 /**
  * Implements validation from the Form API.
  */
-function media_bynder_form_validate($form, &$form_state)
-{
-
-    // if ($form_state['values'][media_bynder_variable_name('ingestspace_id')]) {
-    //   $form_state['values'][media_bynder_variable_name('ingestspace_id')] = trim($form_state['values'][media_bynder_variable_name('ingestspace_id')]);
-    //   if (!media_bynder_validate_idHash($form_state['values'][media_bynder_variable_name('ingestspace_id')])) {
-    //     form_set_error(media_bynder_variable_name('ingestspace_id'), t('Ingestspace id is not a valid idHash.'));
-    //   }
-    // }
-
-    // if ($form_state['values'][media_bynder_variable_name('department_id')]) {
-    //   $form_state['values'][media_bynder_variable_name('department_id')] = trim($form_state['values'][media_bynder_variable_name('department_id')]);
-    //   if (!media_bynder_validate_idHash($form_state['values'][media_bynder_variable_name('department_id')])) {
-    //     form_set_error(media_bynder_variable_name('department_id'), t('Department id is not a valid idHash.'));
-    //   }
-    // }
+function media_bynder_form_validate($form, &$form_state) {
+    if ($form_state['values'][media_bynder_variable_name('url')]) {
+        $form_state['values'][media_bynder_variable_name('url')] = trim($form_state['values'][media_bynder_variable_name('url')]);
+        if (!media_bynder_validate_url($form_state['values'][media_bynder_variable_name('url')])) {
+            form_set_error(media_bynder_variable_name('url'), t('Bynder url is not a valid url.'));
+        }
+    }
 }
 
 /**
- * Validate idHash.
+ * Validations
  */
-function media_bynder_validate_id($id = FALSE)
-{
-    if ($id === FALSE) {
-        return FALSE;
-    }
-
-    if (preg_match('/^\{?[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}\}?$/', $id)) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
+function media_bynder_validate_url($url) {
+    return filter_var($url, FILTER_VALIDATE_URL);
 }

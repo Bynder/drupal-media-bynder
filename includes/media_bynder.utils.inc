@@ -8,8 +8,7 @@
 /**
  * Initialize the Bynder REST client.
  */
-function media_bynder_rest_client()
-{
+function media_bynder_rest_client() {
     return new BynderRestClient(
         media_bynder_variable_get('url') . MEDIA_BYNDER_RESTPOINT,
         media_bynder_variable_get('oauth_consumer'),

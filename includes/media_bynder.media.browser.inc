@@ -2,18 +2,18 @@
 include_once 'media_bynder.admin.inc';
 
 /**
- * Implements hook_media_browser_plugin_view().
- */
+* Implements hook_media_browser_plugin_view().
+*/
 function media_bynder_media_browser_plugin_view($plugin_name, $params) {
-  $path = drupal_get_path('module', 'media_bynder');
+    $path = drupal_get_path('module', 'media_bynder');
 
-  switch ($plugin_name) {
-    case 'media_bynder':
-      return array(
-        '#title' => t('Bynder'),
-        'filter' => drupal_get_form('media_bynder_browser_filter_form')
-      );
-  }
+    switch ($plugin_name) {
+        case 'media_bynder':
+            return array(
+                '#title' => t('Bynder'),
+                'filter' => drupal_get_form('media_bynder_browser_filter_form')
+            );
+    }
 }
 
 function media_bynder_browser_filter_form($form, &$form_state) {

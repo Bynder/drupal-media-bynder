@@ -1,4 +1,13 @@
 (function ($) {
+    function showAlert(message, type) {
+        $('#edit-bynder-search .alert').find('span.text').text(message);
+        $('#edit-bynder-search .alert').removeClass('alert-warning').removeClass('alert-success').removeClass('alert-error');
+        $('#edit-bynder-search .alert').addClass('alert-' + type);
+        $('#edit-bynder-search .alert').fadeIn();
+        setTimeout(function() {
+            $('#edit-bynder-search .alert').fadeOut(1000);
+        }, 2500);
+    }
     $(document).ready(function(){
         $('#edit-bynder-search .facet_list > .facet_title').click(function() {
             $(this).find('.expand i').toggleClass('fa-angle-down').toggleClass('fa-angle-up');
@@ -11,7 +20,7 @@
             var $image = $(e.currentTarget);
             $image.addClass('loading');
 
-            var opts = {
+            var spinner = new Spinner({
                 lines: 13,
                 length: 20,
                 width: 10,
@@ -28,8 +37,7 @@
                 zIndex: 2e9,
                 top: '50%',
                 left: '50%'
-            };
-            var spinner = new Spinner(opts).spin($image[0]);
+            }).spin($image[0]);
 
             var id = $image.attr('data-id');
             var idHash = $image.attr('data-idHash');
@@ -42,30 +50,10 @@
                     id: id,
                     idHash: idHash
                 },
-                success: function(data, textStatus) {
+                success: function(data) {
                     $image.removeClass('loading');
                     spinner.stop();
-                    $(".alert").find('span.text').text(data.message);
-                    $(".alert").removeClass('alert-warning').removeClass('alert-success').removeClass('alert-error');
-                    $(".alert").addClass('alert-' + data.type);
-                    $(".alert").fadeIn();
-                    setTimeout(function() {
-                        $(".alert").fadeOut(1000);
-                    }, 2500);
-                    console.log("success", data, textStatus);
-                },
-                error: function(errorObj, textStatus, errorThrown) {
-                    $image.removeClass('loading');
-                    spinner.stop();
-                    $(".alert").find('span.text').text(data.message);
-                    $(".alert").removeClass('alert-warning').removeClass('alert-success').removeClass('alert-error');
-                    $(".alert").addClass('alert-' + data.type);
-                    $(".alert").fadeIn();
-                    setTimeout(function() {
-                        $(".alert").fadeOut(1000);
-                    }, 2500);
-                    console.log("success", data, textStatus);
-                    console.log("error", errorObj, textStatus, errorThrown);
+                    showAlert(data.message, data.type);
                 }
             });
         });

@@ -7,15 +7,11 @@ dependencies[] = media
 dependencies[] = media_internet
 dependencies[] = styles
 dependencies[] = file_styles
-dependencies[] = media_internet
-dependencies[] = plupload
 
 files[] = includes/BynderRestClient.inc
-files[] = includes/MediaBynderBrowser.inc
 files[] = includes/MediaBynderStreamWrapper.inc
 
 scripts[] = js/spin.min.js
 scripts[] = js/media_bynder.js
-
 
 configure = admin/config/content/media_bynder

@@ -1,0 +1,133 @@
+<?php
+
+/**
+ * @file
+ * A block module that displays recent blog and forum posts.
+ */
+
+/**
+ * load configuration settings
+ */
+include_once dirname(__FILE__) . '/includes/media_bynder.variables.inc';
+include_once dirname(__FILE__) . '/includes/media_bynder.utils.inc';
+
+// Hooks and callbacks for integrating with File Entity module for display.
+require_once dirname(__FILE__) . '/includes/media_bynder.formatters.inc';
+include_once dirname(__FILE__) . '/includes/media_bynder.media.browser.inc';
+drupal_add_css(drupal_get_path('module', 'media_bynder') . '/media_bynder.css');
+drupal_add_css('//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css', array(
+    'type' => 'external'
+));
+
+/**
+ * Implements hook_stream_wrappers().
+ */
+function media_bynder_stream_wrappers() {
+    return array(
+        'bynder' => array(
+            'name' => t('Bynder media'),
+            'class' => 'MediaBynderStreamWrapper',
+            'description' => t('Media provided by Bynder.'),
+            'type' => STREAM_WRAPPERS_READ_VISIBLE | STREAM_WRAPPERS_WRITE_VISIBLE
+        )
+    );
+}
+
+/**
+ * Implements hook_help().
+ *
+ * Displays help and module information.
+ */
+function media_bynder_help($path, $arg) {
+    switch ($path) {
+        case "admin/advanced_help#media_bynder":
+            return '<p>' . t("Advanced Help: Displays links to nodes created on this date") . '</p>';
+
+        case "admin/help#media_bynder":
+            return '<p>' . t("Help: Displays links to nodes created on this date") . '</p>';
+    }
+}
+
+/**
+ * Implements hook menu().
+ */
+function media_bynder_menu() {
+    $items = array();
+    $items['admin/config/media/media_bynder'] = array(
+        'title' => 'Bynder Settings',
+        'description' => 'Configuration for media bynder module',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(
+            'media_bynder_form'
+        ),
+        'access arguments' => array(
+            'administer site configuration'
+        ),
+        'file' => 'includes/media_bynder.admin.inc',
+        'type' => MENU_NORMAL_ITEM
+    );
+    $items['media_bynder'] = array(
+        'title' => 'Media',
+        'page callback' => '_media_bynder_page',
+        'access arguments' => array(
+            'access media_bynder content'
+        ),
+        // Will appear in Navigation menu.
+        'type' => MENU_NORMAL_ITEM
+    );
+    $items['media/add/media_bynder'] = array(
+        'title' => 'Add media from Bynder',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(
+            'media_bynder_add'
+        ),
+        'access arguments' => array(
+            'administer site configuration'
+        ),
+        'type' => MENU_LOCAL_ACTION,
+        'file' => 'includes/media_bynder.admin.inc',
+        'weight' => -1
+    );
+
+    $items['admin/content/media/add/media_bynder'] = $items['media/add/media_bynder'];
+
+    return $items;
+}
+
+/**
+ * Before saving the file.
+ *
+ * @param unknown $file
+ *   the file
+ */
+function media_bynder_file_presave($file) {
+    if (stristr($file->uri, 'bynder://')) {
+        if (($file->type) == 'image') {
+            $file->filemime = 'image/bynder';
+        } elseif (($file->type) == 'video') {
+            $file->filemime = 'video/bynder';
+        }
+    }
+}
+
+/**
+ * Implements custom media browser plugin to the media popup.
+ */
+
+/**
+ * Access callback for media assets.
+ */
+function media_bynder_access($op) {
+    return (user_access('access user profiles') || user_access($op . ' media'));
+}
+
+/**
+ * Implements hook_media_browser_plugin_info().
+ */
+function media_bynder_media_browser_plugin_info() {
+    return array(
+        'media_bynder' => array(
+            '#weight' => 10,
+        )
+    );
+}

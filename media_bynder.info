@@ -1,0 +1,17 @@
+name = Media: Bynder
+description = Integrates Bynder media files with Media.
+package = "Media"
+core = 7.x
+
+dependencies[] = media
+dependencies[] = media_internet
+dependencies[] = styles
+dependencies[] = file_styles
+
+files[] = includes/BynderRestClient.inc
+files[] = includes/MediaBynderStreamWrapper.inc
+
+scripts[] = js/spin.min.js
+scripts[] = js/media_bynder.js
+
+configure = admin/config/content/media_bynder

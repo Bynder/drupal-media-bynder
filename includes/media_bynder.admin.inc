@@ -8,7 +8,6 @@
  */
 
 include_once 'BynderRestClient.inc';
-include_once 'media_bynder.variables.inc';
 
 /**
  * Create a form to add media from Bynder.
@@ -462,7 +461,7 @@ function media_bynder_generate_pager($num_results, $element = 0, $parameters = a
         $_GET['search'] = filter_xss(check_plain($_POST['search']));
     }
 
-    pager_default_initialize($num_results, MEDIA_BYNDER_PAGER, $element);
+    pager_default_initialize($num_results, 25, $element);
     return array(
         '#markup' => theme('pager', array(
             'parameters' => $parameters,
@@ -533,44 +532,44 @@ function media_bynder_form($form, &$form_state) {
         '#collapsible' => TRUE
     );
 
-    $form['media_bynder_settings'][media_bynder_variable_name('url')] = array(
+    $form['media_bynder_settings']['media_bynder_url'] = array(
         '#type' => 'textfield',
         '#title' => t('Bynder url'),
-        '#default_value' => media_bynder_variable_get('url'),
+        '#default_value' => variable_get('media_bynder_url', ''),
         '#size' => 50,
         '#description' => t('The Bynder url.'),
         '#required' => TRUE
     );
-    $form['media_bynder_settings'][media_bynder_variable_name('oauth_consumer')] = array(
+    $form['media_bynder_settings']['media_bynder_oauth_consumer'] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Consumer Token'),
-        '#default_value' => media_bynder_variable_get('oauth_consumer'),
+        '#default_value' => variable_get('media_bynder_oauth_consumer', ''),
         '#size' => 50,
         '#description' => t('The consumer token to be used by the module to communicate with Bynder.'),
         '#required' => TRUE
     );
-    $form['media_bynder_settings'][media_bynder_variable_name('oauth_consumer_secret')] = array(
+    $form['media_bynder_settings']['media_bynder_oauth_consumer_secret'] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Consumer Secret'),
-        '#default_value' => media_bynder_variable_get('oauth_consumer_secret'),
+        '#default_value' => variable_get('oauth_consumer_secret', ''),
         '#size' => 50,
         '#description' => t('The consumer secret to be used by the module to communicate with Bynder.'),
         '#required' => TRUE
     );
 
-    $form['media_bynder_settings'][media_bynder_variable_name('oauth_token')] = array(
+    $form['media_bynder_settings']['media_bynder_oauth_token'] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Token'),
-        '#default_value' => media_bynder_variable_get('oauth_token'),
+        '#default_value' => variable_get('oauth_token', ''),
         '#size' => 50,
         '#description' => t('The token to be used by the module to communicate with Bynder.'),
         '#required' => TRUE
     );
 
-    $form['media_bynder_settings'][media_bynder_variable_name('oauth_token_secret')] = array(
+    $form['media_bynder_settings']['media_bynder_oauth_token_secret'] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Token Secret'),
-        '#default_value' => media_bynder_variable_get('oauth_token_secret'),
+        '#default_value' => variable_get('oauth_token_secret', ''),
         '#size' => 50,
         '#description' => t('The token secret to be used by the module to communicate with Bynder.'),
         '#required' => TRUE
@@ -583,10 +582,10 @@ function media_bynder_form($form, &$form_state) {
  * Implements validation from the Form API.
  */
 function media_bynder_form_validate($form, &$form_state) {
-    if ($form_state['values'][media_bynder_variable_name('url')]) {
-        $form_state['values'][media_bynder_variable_name('url')] = trim($form_state['values'][media_bynder_variable_name('url')]);
-        if (!media_bynder_validate_url($form_state['values'][media_bynder_variable_name('url')])) {
-            form_set_error(media_bynder_variable_name('url'), t('Bynder url is not a valid url.'));
+    if ($form_state['values']['media_bynder_url']) {
+        $form_state['values']['media_bynder_url'] = trim($form_state['values']['media_bynder_url']);
+        if (!media_bynder_validate_url($form_state['values']['media_bynder_url'])) {
+            form_set_error('media_bynder_url', t('Bynder url is not a valid url.'));
         }
     }
 }

@@ -8,7 +8,6 @@
 /**
  * load configuration settings
  */
-include_once dirname(__FILE__) . '/includes/media_bynder.variables.inc';
 include_once dirname(__FILE__) . '/includes/media_bynder.utils.inc';
 
 // Hooks and callbacks for integrating with File Entity module for display.

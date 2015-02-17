@@ -10,11 +10,11 @@
  */
 function media_bynder_rest_client() {
     return new BynderRestClient(
-        media_bynder_variable_get('url') . MEDIA_BYNDER_RESTPOINT,
-        media_bynder_variable_get('oauth_consumer'),
-        media_bynder_variable_get('oauth_consumer_secret'),
-        media_bynder_variable_get('oauth_token'),
-        media_bynder_variable_get('oauth_token_secret')
+      variable_get('media_bynder_url', '') . '/api/v4',
+      variable_get('media_bynder_oauth_consumer', ''),
+      variable_get('media_bynder_oauth_consumer_secret', ''),
+      variable_get('media_bynder_oauth_token', ''),
+      variable_get('media_bynder_oauth_token_secret', '')
     );
 }
 
@@ -28,7 +28,7 @@ function media_bynder_embed_url($fragment_id, $type){
     if(!$type){
         $type = "web";
     }
-    $base_url = media_bynder_variable_get('url');
+    $base_url = variable_get('media_bynder_url', '');
     if (substr($base_url, -1) != '/') {
         $base_url .= '/';
     }

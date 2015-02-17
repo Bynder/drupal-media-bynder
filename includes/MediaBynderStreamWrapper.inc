@@ -9,7 +9,7 @@
 class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
 
     public function interpolateUrl() {
-        $this->base_url = media_bynder_variable_get('url');
+        $this->base_url = variable_get('media_bynder_url', '');
 
         if ($parameters = $this->get_parameters()) {
             return media_bynder_embed_url($parameters['i']);

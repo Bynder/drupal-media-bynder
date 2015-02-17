@@ -3,10 +3,7 @@ description = Integrates Bynder media files with Media.
 package = "Media"
 core = 7.x
 
-dependencies[] = media
 dependencies[] = media_internet
-dependencies[] = styles
-dependencies[] = file_styles
 
 files[] = includes/BynderRestClient.inc
 files[] = includes/MediaBynderStreamWrapper.inc

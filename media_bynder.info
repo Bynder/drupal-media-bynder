@@ -4,6 +4,7 @@ package = "Media"
 core = 7.x
 
 dependencies[] = media_internet
+dependencies[] = oauth_common
 
 files[] = includes/BynderRestClient.inc
 files[] = includes/MediaBynderStreamWrapper.inc

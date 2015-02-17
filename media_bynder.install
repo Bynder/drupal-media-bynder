@@ -6,20 +6,12 @@
  */
 
 /**
- * Implements hook_install().
- */
-function media_bynder_install() {
-    media_bynder_variable_set('url', '');
-    media_bynder_variable_set('oauth_consumer', '');
-    media_bynder_variable_set('oauth_consumer_secret', '');
-    media_bynder_variable_set('oauth_token', '');
-    media_bynder_variable_set('oauth_token_secret', '');
-    return array('#finished' => 1);
-}
-
-/**
  * Implements hook_uninstall().
  */
 function media_bynder_uninstall() {
-    return array();
+  variable_del('media_bynder_url');
+  variable_del('media_bynder_oauth_consumer');
+  variable_del('media_bynder_oauth_consumer_secret');
+  variable_del('media_bynder_oauth_token');
+  variable_del('media_bynder_oauth_token_secret');
 }

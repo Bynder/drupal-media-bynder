@@ -1,5 +1,4 @@
 <?php
-require('OAuth.php');
 
 /**
  * @file

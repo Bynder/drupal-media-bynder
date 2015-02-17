@@ -19,6 +19,7 @@ Required Modules
 ---------------------
 Upload the following required modules into the folder "sites/all/modules", some modules require additional modules to operate!
 *   [Media 2.x] (https://drupal.org/project/media)
+*   [OAuth 3.x] (https://drupal.org/project/oauth)
 
 Go to the "Modules" panel in your admin view and enable the listed modules.
 

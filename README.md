@@ -19,10 +19,6 @@ Required Modules
 ---------------------
 Upload the following required modules into the folder "sites/all/modules", some modules require additional modules to operate!
 *   [Media 2.x] (https://drupal.org/project/media)
-*   [File_entity](https://drupal.org/project/file_entity)
-*   [Views](https://drupal.org/project/views)
-*   [Ctools](https://drupal.org/project/ctools)
-*   [Styles](https://drupal.org/project/styles)
 
 Go to the "Modules" panel in your admin view and enable the listed modules.
 

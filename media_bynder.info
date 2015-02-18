@@ -7,6 +7,7 @@ dependencies[] = media_internet
 dependencies[] = oauth_common
 
 files[] = includes/BynderRestClient.inc
+files[] = includes/MediaBynderBrowser.inc
 files[] = includes/MediaBynderStreamWrapper.inc
 
 scripts[] = js/spin.min.js

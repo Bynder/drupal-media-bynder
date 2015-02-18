@@ -108,25 +108,3 @@ function media_bynder_file_presave($file) {
         }
     }
 }
-
-/**
- * Implements custom media browser plugin to the media popup.
- */
-
-/**
- * Access callback for media assets.
- */
-function media_bynder_access($op) {
-    return (user_access('access user profiles') || user_access($op . ' media'));
-}
-
-/**
- * Implements hook_media_browser_plugin_info().
- */
-function media_bynder_media_browser_plugin_info() {
-    return array(
-        'media_bynder' => array(
-            '#weight' => 10,
-        )
-    );
-}

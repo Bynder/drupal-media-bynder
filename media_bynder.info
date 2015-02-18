@@ -8,7 +8,4 @@ dependencies[] = media_internet
 files[] = includes/BynderRestClient.inc
 files[] = includes/MediaBynderStreamWrapper.inc
 
-scripts[] = js/spin.min.js
-scripts[] = js/media_bynder.js
-
 configure = admin/config/content/media_bynder

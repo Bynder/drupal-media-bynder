@@ -44,6 +44,18 @@ function media_bynder_help($path, $arg) {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function media_bynder_permission() {
+  return array(
+    'administer media bynder' => array(
+      'title' => t('Administer Media: Bynder'),
+      'description' => t('Configure Bynder API connection settings.'),
+    ),
+  );
+}
+
+/**
  * Implements hook menu().
  */
 function media_bynder_menu() {
@@ -56,7 +68,7 @@ function media_bynder_menu() {
             'media_bynder_form'
         ),
         'access arguments' => array(
-            'administer site configuration'
+            'administer media bynder'
         ),
         'file' => 'includes/media_bynder.admin.inc',
         'type' => MENU_NORMAL_ITEM

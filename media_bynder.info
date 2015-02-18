@@ -10,7 +10,4 @@ files[] = includes/BynderRestClient.inc
 files[] = includes/MediaBynderBrowser.inc
 files[] = includes/MediaBynderStreamWrapper.inc
 
-scripts[] = js/spin.min.js
-scripts[] = js/media_bynder.js
-
 configure = admin/config/content/media_bynder

@@ -15,6 +15,15 @@ include_once 'BynderRestClient.inc';
 function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     module_load_include('inc', 'media', 'includes/media.browser');
 
+    $form['#attached']['library'][] = array('media_bynder', 'media_bynder_administration');
+
+    $form['#attached']['css'][] = array(
+        'type' => 'external',
+        'data' => '//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css',
+    );
+
+    drupal_process_attached($form);
+
     $id = media_bynder_parameter($_POST, 'id');
     if ($id !== NULL) {
         media_bynder_submit_mob($form, $form_state);

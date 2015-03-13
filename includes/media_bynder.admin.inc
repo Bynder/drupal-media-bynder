@@ -425,9 +425,7 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
                 }
                 $query .= '&propertyOptionId=' . implode(',', $meta_facets);
             }else{
-                if($facet_category != 'q'){
-                    $query .= '&' . $facet_category . '=' . implode(',', $facets);
-                }
+                $query .= '&' . $facet_category . '=' . implode(',', $facets);
             }
         }
     }

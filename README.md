@@ -27,10 +27,10 @@ Go to the "Modules" panel in your admin view and enable the listed modules.
 Bynder Configuration Settings
 ---------------------
 <h3>Bynder API</h3>
-*Bynder url:* The url to be used by the module to communicate with Bynder.
-*Bynder oauth consumer:* The oauth consumer to be used by the module to communicate with Bynder.
-*Bynder oauth consumer secret:* The oauth consumer secret to be used by the module to communicate with Bynder.
-*Bynder oauth token:* The oauth token to be used by the module to communicate with Bynder.
+*Bynder url:* The url to be used by the module to communicate with Bynder.  
+*Bynder oauth consumer:* The oauth consumer to be used by the module to communicate with Bynder.  
+*Bynder oauth consumer secret:* The oauth consumer secret to be used by the module to communicate with Bynder.  
+*Bynder oauth token:* The oauth token to be used by the module to communicate with Bynder.  
 *Bynder oauth token secret:* The oauth token secret to be used by the module to communicate with Bynder.
 
 These settings require a Bynder account, for more information please visit [www.getbynder.com](http://www.getbynder.com)

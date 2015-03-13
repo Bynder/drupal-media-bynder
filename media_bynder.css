@@ -149,6 +149,7 @@
 
 #edit-bynder-search .item-list .facet_list .facet_title > .item-list {
     position: absolute;
+    z-index: 10;
 
     display: none;
     width: 23%;

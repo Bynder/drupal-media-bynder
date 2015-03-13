@@ -125,11 +125,40 @@ class BynderRestClient {
     }
 
     public function getFacets($query) {
-        error_log($this->baseRestUrl . '/media/?count=1' . $query);
         $this->options[CURLOPT_URL] = $this->baseRestUrl . '/media/?count=1' . $query;
         $result = $this->execute();
         $result = json_decode($result);
 
         return $result->count;
+    }
+
+    public function getMetaProperties() {
+        $this->options[CURLOPT_URL] = $this->baseRestUrl . '/metaproperties/';
+        $result = $this->execute();
+
+        $result = json_decode($result);
+        $meta_properties = $this->limitMetaProperties($result);
+        return $meta_properties;
+    }
+    private function limitMetaProperties($result) {
+        $limited_meta_properties = [];
+        foreach($result as $meta_property) {
+            $limited_meta_property = [];
+            $limited_meta_property['id'] = $meta_property->id;
+            $limited_meta_property['label'] = $meta_property->label;
+            $limited_meta_property['name'] = $meta_property->name;
+
+            foreach($meta_property->options as $option){
+                $limited_meta_property['options'][] = array(
+                    "id" => $option->id,
+                    "label" => $option->label,
+                    "name" => $option->name
+                );
+            }
+            if(isset($limited_meta_property['options']) && count($limited_meta_property['options'])){
+                $limited_meta_properties[] = $limited_meta_property;
+            }
+        }
+        return $limited_meta_properties;
     }
 }

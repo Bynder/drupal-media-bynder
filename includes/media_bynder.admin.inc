@@ -41,11 +41,22 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
 function media_bynder_generate_search($state) {
     $data = array('#type' => 'fieldset');
 
+    $rest_client = media_bynder_rest_client();
+    $meta_properties = $rest_client->getMetaProperties();
+
     $brands = media_bynder_brands();
     $search = media_bynder_search_string($state);
     $selected_facets = media_bynder_selected_facets($state);
-    $results = media_bynder_search_results($search, $selected_facets);
+    $results = media_bynder_search_results($search, $selected_facets, $meta_properties);
     $available_facets = $results['count'];
+
+    foreach($meta_properties as $meta_property) {
+        $available_facets[$meta_property['name']] = [];
+        foreach($meta_property['options'] as $meta_property_option) {
+            $available_facets[$meta_property['name']][$meta_property_option['name']] = '-';
+        }
+    }
+
     $selected_facets = media_bynder_remove_hidden_facets($available_facets, $selected_facets);
 
     $data['search'] = array(
@@ -55,7 +66,7 @@ function media_bynder_generate_search($state) {
         '#description' => "<p class='alert alert-warning' style='display:none'><span class='text'></span></p>",
     );
 
-    $data['facets'] = media_bynder_generate_facets($available_facets, $selected_facets, $brands);
+    $data['facets'] = media_bynder_generate_facets($available_facets, $selected_facets, $brands, $meta_properties);
 
     $data['button'] = array(
         '#type' => 'button',
@@ -139,6 +150,12 @@ function media_bynder_selected_facets($state) {
         $selected_facets = array_merge($selected_facets, array(
             "orientation" => (array) $_GET['orientation']));
     }
+    foreach($_GET as $query_param_key => $query_param){
+        if(!isset($selected_facets[$query_param_key]) && $query_param_key != 'q'){
+            $selected_facets = array_merge($selected_facets, array(
+            $query_param_key => (array) $query_param));
+        }
+    }
 
     return $selected_facets;
 }
@@ -203,7 +220,7 @@ function media_bynder_parse_selected_facets($selected_facets) {
 /**
  * Generate facets.
  */
-function media_bynder_generate_facets($facets, $selected_facets, $brands) {
+function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_properties) {
     if (empty($facets)) {
         return array();
     }
@@ -217,11 +234,18 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands) {
         )
     );
 
+    $meta_property_labels = [];
+    $meta_property_icons = [];
+    foreach($meta_properties as $meta_property){
+        $meta_property_labels[$meta_property['name']] = $meta_property['label'];
+        $meta_property_icons[$meta_property['name']] = 'caret-right';
+    }
+
     foreach ($facets as $facet_category_name => $facet_category) {
         if($facet_category_name == 'categoryId'){
             continue;
         }
-        $children = media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands);
+        $children = media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties);
         $labels = array(
             'brandId' => t('Brands'),
             'subBrandId' => t('Sub-brands'),
@@ -229,6 +253,7 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands) {
             'type' => t('Type'),
             'orientation' => t('Orientation')
         );
+        $labels = array_merge($meta_property_labels, $labels);
         $icons = array(
             'brandId' => 'archive',
             'subBrandId' => 'briefcase',
@@ -236,6 +261,7 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands) {
             'type' => 'file',
             'orientation' => 'image'
         );
+        $icons = array_merge($meta_property_icons, $icons);
         $facet_category = array(
             'data' => "<span><i class='fa fa-" . filter_xss($icons[$facet_category_name]) . "'></i> " . filter_xss($labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
             'id' => $facet_category_name,
@@ -254,12 +280,21 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands) {
 /**
  * Generate links for facets.
  */
-function media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands) {
+function media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties) {
     $facet_links = array();
+
+    $meta_property_labels = [];
+    foreach($meta_properties as $meta_property) {
+        foreach($meta_property['options'] as $meta_property_option) {
+            $meta_property_labels[$meta_property_option['name']] = $meta_property_option['label'];
+        }
+    }
 
     foreach ($facet_category as $facet_id => $facet_count) {
         if($facet_category_name == 'brandId'){
             $facet_name = media_bynder_get_brand_name($brands, $facet_id);
+        }elseif(isset($meta_property_labels[$facet_id])){
+            $facet_name = $meta_property_labels[$facet_id];
         }else{
             $facet_name = $facet_id;
         }
@@ -365,7 +400,7 @@ function media_bynder_brands() {
  * @return mixed
  *   the search results.
  */
-function media_bynder_search_results($search, $selected_facets) {
+function media_bynder_search_results($search, $selected_facets, $meta_properties) {
     $start_index = 0;
     $nr_of_results = 25;
     $query = '';
@@ -374,10 +409,24 @@ function media_bynder_search_results($search, $selected_facets) {
         $current_page = (int) filter_xss($_GET['page']);
         $start_index = $current_page * $nr_of_results;
     }
+    $selected_facets_meta_properties = [];
+    foreach($meta_properties as $meta_property){
+        foreach($meta_property['options'] as $meta_property_option){
+            $selected_facets_meta_properties[$meta_property['name']][$meta_property_option['name']] = $meta_property_option['id'];
+        }
+    }
 
     if (isset($selected_facets)) {
         foreach ($selected_facets as $facet_category => $facets) {
-            $query .= '&' . $facet_category . '=' . implode(',', $facets);
+            if(isset($selected_facets_meta_properties[$facet_category])){
+                $meta_facets = [];
+                foreach(explode(',', $facets[0]) as $facet){
+                    $meta_facets[] = $selected_facets_meta_properties[$facet_category][$facet];
+                }
+                $query .= '&propertyOptionId=' . implode(',', $meta_facets);
+            }else{
+                $query .= '&' . $facet_category . '=' . implode(',', $facets);
+            }
         }
     }
 
@@ -560,7 +609,7 @@ function media_bynder_form($form, &$form_state) {
     $form['media_bynder_settings']['media_bynder_oauth_consumer_secret'] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Consumer Secret'),
-        '#default_value' => variable_get('oauth_consumer_secret', ''),
+        '#default_value' => variable_get('media_bynder_oauth_consumer_secret', ''),
         '#size' => 50,
         '#description' => t('The consumer secret to be used by the module to communicate with Bynder.'),
         '#required' => TRUE
@@ -569,7 +618,7 @@ function media_bynder_form($form, &$form_state) {
     $form['media_bynder_settings']['media_bynder_oauth_token'] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Token'),
-        '#default_value' => variable_get('oauth_token', ''),
+        '#default_value' => variable_get('media_bynder_oauth_token', ''),
         '#size' => 50,
         '#description' => t('The token to be used by the module to communicate with Bynder.'),
         '#required' => TRUE
@@ -578,7 +627,7 @@ function media_bynder_form($form, &$form_state) {
     $form['media_bynder_settings']['media_bynder_oauth_token_secret'] = array(
         '#type' => 'textfield',
         '#title' => t('OAuth Token Secret'),
-        '#default_value' => variable_get('oauth_token_secret', ''),
+        '#default_value' => variable_get('media_bynder_oauth_token_secret', ''),
         '#size' => 50,
         '#description' => t('The token secret to be used by the module to communicate with Bynder.'),
         '#required' => TRUE

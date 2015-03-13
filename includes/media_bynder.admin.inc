@@ -151,7 +151,7 @@ function media_bynder_selected_facets($state) {
             "orientation" => (array) $_GET['orientation']));
     }
     foreach($_GET as $query_param_key => $query_param){
-        if(!isset($selected_facets[$query_param_key]) && $query_param_key != 'q'){
+        if(!isset($selected_facets[$query_param_key])){
             $selected_facets = array_merge($selected_facets, array(
             $query_param_key => (array) $query_param));
         }
@@ -425,7 +425,9 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
                 }
                 $query .= '&propertyOptionId=' . implode(',', $meta_facets);
             }else{
-                $query .= '&' . $facet_category . '=' . implode(',', $facets);
+                if($facet_category != 'q'){
+                    $query .= '&' . $facet_category . '=' . implode(',', $facets);
+                }
             }
         }
     }

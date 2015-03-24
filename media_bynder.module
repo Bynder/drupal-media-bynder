@@ -13,6 +13,8 @@ include_once dirname(__FILE__) . '/includes/media_bynder.utils.inc';
 // Hooks and callbacks for integrating with File Entity module for display.
 require_once dirname(__FILE__) . '/includes/media_bynder.formatters.inc';
 
+require_once dirname(__FILE__) . '/includes/media_bynder.admin.inc';
+
 /**
  * Implements hook_stream_wrappers().
  */
@@ -26,6 +28,19 @@ function media_bynder_stream_wrappers() {
         )
     );
 }
+
+/**
+ * Implements hook_media_browser_plugin_info().
+ */
+function media_bynder_media_browser_plugin_info() {
+  $info['media_bynder'] = array(
+    'title' => t('Bynder'),
+    'class' => 'MediaBynderBrowser'
+  );
+
+  return $info;
+}
+
 
 /**
  * Implements hook_help().

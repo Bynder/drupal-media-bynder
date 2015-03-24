@@ -1,17 +1,76 @@
 (function ($) {
     function showAlert(message, type) {
-        $('#edit-bynder-search .alert').find('span.text').text(message);
-        $('#edit-bynder-search .alert').removeClass('alert-warning').removeClass('alert-success').removeClass('alert-error');
-        $('#edit-bynder-search .alert').addClass('alert-' + type);
-        $('#edit-bynder-search .alert').fadeIn();
+        var alert = $('#edit-bynder-search .alert');
+            alert.find('span.text').text(message);
+            alert.removeClass('alert-warning').removeClass('alert-success').removeClass('alert-error');
+            alert.addClass('alert-' + type);
+            alert.fadeIn();
         setTimeout(function() {
-            $('#edit-bynder-search .alert').fadeOut(1000);
+            alert.fadeOut(1000);
         }, 2500);
     }
     $(document).ready(function(){
-        $('#edit-bynder-search .facet_list > .facet_title').click(function() {
+        $('#edit-bynder-search .normal_facet_list > .facet_title').click(function() {
             $(this).find('.expand i').toggleClass('fa-angle-down').toggleClass('fa-angle-up');
             $(this).find(' > .item-list').slideToggle(300);
+        });
+
+        $('#edit-bynder-search .selected_facet_list > .facet_title').click(function(e) {
+            var link = $(e.currentTarget);
+            var filters_input = $('#edit-bynder-search input[name="filters"]');
+
+            var filter_key = link.data('filter-key');
+            var current_filters = JSON.parse(filters_input.val() || '{}');
+            current_filters.filters = current_filters.filters || [];
+
+            var exists = ($.grep(current_filters.filters, function(e, i){
+                return e.key == filter_key;
+            }).length);
+            if(exists){
+                //Remove current filter from list
+                current_filters.filters = $.grep(current_filters.filters, function(e, i){
+                    return e.key != filter_key;
+                });
+                link.removeClass('active');
+            }
+            filters_input.val(JSON.stringify(current_filters));
+            link.parent().fadeOut(300, function() { $(this).remove(); });
+            $('#media-bynder-add').submit();
+        });
+
+        $('#edit-bynder-search .filter-url').click(function(e) {
+            e.preventDefault();
+
+            var link = $(e.currentTarget);
+            var filter_key = link.data('filter-key');
+            var filter_value = link.data('filter-value');
+            // var active = link.hasClass('active');
+
+            var filters_input = $('#edit-bynder-search input[name="filters"]');
+
+            var current_filters = JSON.parse(filters_input.val() || '{}');
+            current_filters.filters = current_filters.filters || [];
+
+            var exists = ($.grep(current_filters.filters, function(e, i){
+                return e.key == filter_key;
+            }).length);
+            if(!exists){
+                //Add current filter from list
+                current_filters.filters.push({
+                    key: filter_key,
+                    value: filter_value,
+                });
+                link.addClass('active');
+            }else{
+                //Remove current filter from list
+                current_filters.filters = $.grep(current_filters.filters, function(e, i){
+                    return e.key != filter_key;
+                });
+                link.removeClass('active');
+            }
+
+            filters_input.val(JSON.stringify(current_filters));
+            $('#media-bynder-add').submit();
         });
 
         $('#edit-bynder-search .result_list .bynder-image').click(function(e){
@@ -56,6 +115,27 @@
                     showAlert(data.message, data.type);
                 }
             });
+        });
+
+        $('#media-bynder-add').submit(function() {
+            var spinner = new Spinner({
+                lines: 13,
+                length: 20,
+                width: 10,
+                radius: 30,
+                corners: 1,
+                rotate: 0,
+                direction: 1,
+                color: '#000',
+                speed: 1,
+                trail: 60,
+                shadow: false,
+                hwaccel: false,
+                className: 'spinner',
+                zIndex: 2e9,
+                top: '50%',
+                left: '50%'
+            }).spin($('#edit-bynder-search')[0]);
         });
     });
 })(jQuery);

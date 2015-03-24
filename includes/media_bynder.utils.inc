@@ -24,7 +24,7 @@ function media_bynder_rest_client() {
  * @param string $fragment_id idHash of entity.
  * @param string $type web, mini, thul
  */
-function media_bynder_embed_url($fragment_id, $type){
+function media_bynder_embed_url($fragment_id, $type=false){
     if(!$type){
         $type = "web";
     }

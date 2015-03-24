@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @file
+ * @file media_bynder/includes/MediaBynderBrowser.inc
+ *
  * Definition of MediaBynderBrowser.
  */
 
@@ -20,8 +21,6 @@ class MediaBynderBrowser extends MediaBrowserPlugin {
    * Implements MediaBrowserPlugin::view().
    */
   public function view() {
-    module_load_include('inc', 'media_bynder', 'includes/media_bynder.admin');
-
     $build = array();
     $params = $this->params;
     $build['form'] = drupal_get_form('media_bynder_add', $params);

@@ -82,6 +82,11 @@
     margin-left: -2%;
 }
 
+#edit-bynder-search .item-list .facet_list .facet_title {
+  max-height: 290px;
+  overflow-y: scroll;
+}
+
 #edit-bynder-search .item-list .facet_list .facet_title ul li {
     position: relative;
 

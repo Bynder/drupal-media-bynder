@@ -28,16 +28,11 @@ class BynderRestClient {
             CURLOPT_SSL_VERIFYHOST => FALSE,
             CURLOPT_HEADER => false
         );
-
-        // $this->test();
-        // exit;
     }
 
     public function test() {
-        $url = $this->baseRestUrl . '/metaproperties/';
-
-        $this->options[CURLOPT_URL] = $url;
-        var_dump($this->execute());
+        print_r($this->getMetaProperties());
+        exit;
     }
 
     protected function initCurl() {

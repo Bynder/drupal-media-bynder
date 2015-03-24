@@ -46,18 +46,11 @@ function media_bynder_generate_search($state) {
 
     $brands = media_bynder_brands();
     $search = media_bynder_search_string($state);
-    $selected_facets = media_bynder_selected_facets($state);
-    $results = media_bynder_search_results($search, $selected_facets, $meta_properties);
+    $filters = media_bynder_filters_json($state);
+
+    $selected_facets = media_bynder_selected_facets($filters);
+    $results = media_bynder_search_results($search, $filters, $meta_properties);
     $available_facets = $results['count'];
-
-    foreach($meta_properties as $meta_property) {
-        $available_facets[$meta_property['name']] = [];
-        foreach($meta_property['options'] as $meta_property_option) {
-            $available_facets[$meta_property['name']][$meta_property_option['name']] = '-';
-        }
-    }
-
-    $selected_facets = media_bynder_remove_hidden_facets($available_facets, $selected_facets);
 
     $data['search'] = array(
         '#type' => 'textfield',
@@ -65,6 +58,8 @@ function media_bynder_generate_search($state) {
         '#default_value' => $search !== NULL ? $search : '',
         '#description' => "<p class='alert alert-warning' style='display:none'><span class='text'></span></p>",
     );
+
+    $data['selected_facets'] = media_bynder_generate_selected_facets($filters);
 
     $data['facets'] = media_bynder_generate_facets($available_facets, $selected_facets, $brands, $meta_properties);
 
@@ -74,6 +69,11 @@ function media_bynder_generate_search($state) {
         '#submit' => array(
             'media_bynder_add_test'
         )
+    );
+
+    $data['filters'] = array(
+      '#type' => 'hidden',
+      '#default_value' => (json_encode($filters) != '[]') ? json_encode($filters) : '{"filters": []}'
     );
 
     $data['results'] = media_bynder_generate_results($results);
@@ -120,9 +120,24 @@ function media_bynder_search_string($state) {
 }
 
 /**
+ * Return entered filters.
+ */
+function media_bynder_filters_json($state) {
+    $filters = array();
+
+    if (isset($state['values']['filters'])) {
+        $filters_json = json_decode($state['values']['filters']);
+        if($filters_json){
+            $filters = $filters_json->filters;
+        }
+    }
+    return $filters;
+}
+
+/**
  * Return selected facets.
  */
-function media_bynder_selected_facets($state) {
+function media_bynder_selected_facets($filters) {
     $selected_facets = array();
 
     if (isset($state['values']['search'])) {
@@ -130,30 +145,13 @@ function media_bynder_selected_facets($state) {
             "keyword" => (array) $state['values']['search']));
     }
 
-    if (isset($_GET['brandId'])) {
-        $selected_facets = array_merge($selected_facets, array(
-            "brandId" => (array) $_GET['brandId']));
-    }
-    if (isset($_GET['subBrandId'])) {
-        $selected_facets = array_merge($selected_facets, array(
-            "subBrandId" => (array) $_GET['subBrandId']));
-    }
-    if (isset($_GET['tags'])) {
-        $selected_facets = array_merge($selected_facets, array(
-            "tags" => (array) $_GET['tags']));
-    }
-    if (isset($_GET['type'])) {
-        $selected_facets = array_merge($selected_facets, array(
-            "type" => (array) $_GET['type']));
-    }
-    if (isset($_GET['orientation'])) {
-        $selected_facets = array_merge($selected_facets, array(
-            "orientation" => (array) $_GET['orientation']));
-    }
-    foreach($_GET as $query_param_key => $query_param){
-        if(!isset($selected_facets[$query_param_key])){
+    if (isset($state['values']['filters'])) {
+        $filters_json = json_decode($state['values']['filters']);
+        $filters = $filters_json->filters;
+
+        foreach($filters as $filter){
             $selected_facets = array_merge($selected_facets, array(
-            $query_param_key => (array) $query_param));
+                $filter->key => $filter->value));
         }
     }
 
@@ -217,6 +215,33 @@ function media_bynder_parse_selected_facets($selected_facets) {
     return FALSE;
 }
 
+function media_bynder_generate_selected_facets($selected_facets) {
+    if (empty($selected_facets)) {
+        return array();
+    }
+
+    $facets_list = array(
+        '#theme' => 'item_list',
+        '#type' => 'ul',
+        '#title' => t('Selected Facets'),
+        '#attributes' => array(
+            'class' => 'selected_facet_list facet_list'
+        )
+    );
+    foreach ($selected_facets as $selected_facet) {
+        $facet_category = array(
+            'data' => "<span>" . $selected_facet->key . "<span class='expand'><i class='fa fa-times'></i></span></span>",
+            'class' => array(
+                'facet_title'
+            ),
+            'data-filter-key' => $selected_facet->key
+        );
+        $facets_list['#items'][] = $facet_category;
+    }
+
+    return $facets_list;
+}
+
 /**
  * Generate facets.
  */
@@ -230,19 +255,16 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
         '#type' => 'ul',
         '#title' => t('Facets'),
         '#attributes' => array(
-            'class' => 'facet_list'
+            'class' => 'normal_facet_list facet_list'
         )
     );
 
-    $meta_property_labels = [];
-    $meta_property_icons = [];
-    foreach($meta_properties as $meta_property){
-        $meta_property_labels[$meta_property['name']] = $meta_property['label'];
-        $meta_property_icons[$meta_property['name']] = 'caret-right';
-    }
-
     foreach ($facets as $facet_category_name => $facet_category) {
         if($facet_category_name == 'categoryId'){
+            continue;
+        }
+        //Hide single item filters.
+        if(count($facet_category) < 2){
             continue;
         }
         $children = media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties);
@@ -253,17 +275,19 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
             'type' => t('Type'),
             'orientation' => t('Orientation')
         );
-        $labels = array_merge($meta_property_labels, $labels);
+        if(!isset($labels[$facet_category_name])){
+            $labels[$facet_category_name] = t($facet_category_name);
+        }
+        // $labels = array_merge($meta_property_labels, $labels);
         $icons = array(
             'brandId' => 'archive',
             'subBrandId' => 'briefcase',
             'tags' => 'tags',
             'type' => 'file',
-            'orientation' => 'image'
+            'orientation' => 'image',
         );
-        $icons = array_merge($meta_property_icons, $icons);
         $facet_category = array(
-            'data' => "<span><i class='fa fa-" . filter_xss($icons[$facet_category_name]) . "'></i> " . filter_xss($labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
+            'data' => "<span><i class='fa fa-" . filter_xss(isset($icons[$facet_category_name]) ? $icons[$facet_category_name] : 'caret-right'). "'></i> " . filter_xss($labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
             'id' => $facet_category_name,
             'class' => array(
                 'facet_title'
@@ -298,13 +322,13 @@ function media_bynder_generate_facets_link($facet_category, $facet_category_name
         }else{
             $facet_name = $facet_id;
         }
-        $activate_href_link = media_bynder_query_facet_link($facet_category_name, $facet_id, $selected_facets);
-        $deactivate_href_link = media_bynder_query_facet_link($facet_category_name, $facet_id, $selected_facets, true);
+        $filter_key = $facet_category_name;
+        $filter_value = $facet_id;
+
         $active = media_bynder_facet_active($selected_facets, array($facet_category_name => array($facet_id)));
         $active_class = $active ? "active" : "";
-        $href_link = ($active)? $deactivate_href_link : $activate_href_link;
         $link = "";
-        $link .= '<a class="' . filter_xss($active_class) . '" href="?' . filter_xss($href_link) . '">' . filter_xss($facet_name) . '</a>';
+        $link .= '<a class="filter-url ' . filter_xss($active_class) . '" href="#" data-filter-key="' . filter_xss($filter_key) . '" data-filter-value="' . filter_xss($filter_value) .'">' . filter_xss($facet_name) . '</a>';
         $link .= '<span class="count">(' . filter_xss($facet_count) . ')</span>';
         $facet_links[] = $link;
     }
@@ -417,7 +441,10 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
     }
 
     if (isset($selected_facets)) {
-        foreach ($selected_facets as $facet_category => $facets) {
+        foreach ($selected_facets as $facet) {
+            $facets = $facet->value;
+            $facet_category = $facet->key;
+
             if(isset($selected_facets_meta_properties[$facet_category])){
                 $meta_facets = [];
                 foreach(explode(',', $facets[0]) as $facet){
@@ -425,11 +452,10 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
                 }
                 $query .= '&propertyOptionId=' . implode(',', $meta_facets);
             }else{
-                $query .= '&' . $facet_category . '=' . implode(',', $facets);
+                $query .= '&' . $facet_category . '=' . $facets;
             }
         }
     }
-
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->search($query, $start_index, $nr_of_results);
 
@@ -446,6 +472,7 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
         }
     } else {
         drupal_set_message(t('Could not retrieve search results:') . filter_xss($rest_client->error), 'error');
+        return false;
     }
 
     return $arr_json;

@@ -17,7 +17,7 @@ Download the latest release and copy the bynder module to "sites/all/modules" an
 
 Required Modules
 ---------------------
-Upload the following required modules into the folder "sites/all/modules", some modules require additional modules to operate!
+Upload the following required modules into the folder "sites/all/modules", some modules require additional modules to operate!  
 Versions matter!
 
 *   [Media 2.x] (https://drupal.org/project/media)

@@ -18,8 +18,11 @@ Download the latest release and copy the bynder module to "sites/all/modules" an
 Required Modules
 ---------------------
 Upload the following required modules into the folder "sites/all/modules", some modules require additional modules to operate!
+Versions matter!
+
 *   [Media 2.x] (https://drupal.org/project/media)
 *   [OAuth 3.x] (https://drupal.org/project/oauth)
+*   [File Entity 2.x] (https://www.drupal.org/project/file_entity)
 
 Go to the "Modules" panel in your admin view and enable the listed modules.
 

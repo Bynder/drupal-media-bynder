@@ -1,6 +1,8 @@
 (function ($) {
     'use strict';
 
+    var spinner;
+
     function showAlert(message, type) {
         var alert = $('#edit-bynder-search .alert');
             alert.find('span.text').text(message);
@@ -10,6 +12,27 @@
         setTimeout(function() {
             alert.fadeOut(1000);
         }, 2500);
+    }
+
+    function showSpinner(element) {
+        spinner = new Spinner({
+            lines: 13,
+            length: 20,
+            width: 10,
+            radius: 30,
+            corners: 1,
+            rotate: 0,
+            direction: 1,
+            color: '#000',
+            speed: 1,
+            trail: 60,
+            shadow: false,
+            hwaccel: false,
+            className: 'spinner',
+            zIndex: 2e9,
+            top: '50%',
+            left: '50%'
+        }).spin(element);
     }
 
     $(document).ready(function(){
@@ -82,24 +105,7 @@
             var $image = $(e.currentTarget);
             $image.addClass('loading');
 
-            var spinner = new Spinner({
-                lines: 13,
-                length: 20,
-                width: 10,
-                radius: 30,
-                corners: 1,
-                rotate: 0,
-                direction: 1,
-                color: '#000',
-                speed: 1,
-                trail: 60,
-                shadow: false,
-                hwaccel: false,
-                className: 'spinner',
-                zIndex: 2e9,
-                top: '50%',
-                left: '50%'
-            }).spin($image[0]);
+            showSpinner($image[0]);
 
             var id = $image.attr('data-id');
             var idHash = $image.attr('data-idHash');
@@ -130,24 +136,7 @@
         $('#media-bynder-add').submit(function() {
             var media_library_mode = $('body').hasClass('page-admin-content-media-add-media-bynder');
             if(media_library_mode){
-                var spinner = new Spinner({
-                    lines: 13,
-                    length: 20,
-                    width: 10,
-                    radius: 30,
-                    corners: 1,
-                    rotate: 0,
-                    direction: 1,
-                    color: '#000',
-                    speed: 1,
-                    trail: 60,
-                    shadow: false,
-                    hwaccel: false,
-                    className: 'spinner',
-                    zIndex: 2e9,
-                    top: '50%',
-                    left: '50%'
-                }).spin($('#edit-bynder-search')[0]);
+                showSpinner($('#edit-bynder-search')[0]);
             }
         });
     });

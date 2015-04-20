@@ -80,6 +80,9 @@ function media_bynder_uri_parse_style_url($uri) {
  * Parse the uri.
  */
 function media_bynder_uri_parse_url($uri) {
+    if(!validateBynderDrupalUrl($uri)){
+        return FALSE;
+    }
     $target = file_uri_target($uri);
     $parts = explode('/', $target);
     if(isset($parts[1]) && isset($parts[3])){
@@ -91,3 +94,43 @@ function media_bynder_uri_parse_url($uri) {
         return FALSE;
     }
 }
+
+
+function isValid($type, $val){
+    switch($type){
+        case "uuid":
+            return preg_match("/^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$/", val);
+        case "idHash":
+            return preg_match("/[a-f0-9]{16}/", $val);
+        case "bynder_drupal_url":
+            return preg_match("/bynder:\/\/f\/[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}\/i\/[a-f0-9]{16}/", $val);
+    }
+    return true;
+};
+
+function validateUUID($str){
+    if (isValid("uuid", $str)) {
+        return $str;
+    } else {
+        error_log("Invalid UUID: " . $str);
+        return FALSE;
+    }
+};
+
+function validateIdHash($str){
+    if (isValid('idHash', $str)) {
+        return $str;
+    } else {
+        error_log("Invalid IDHash: " . $str);
+        return FALSE;
+    }
+};
+
+function validateBynderDrupalUrl($str){
+    if (isValid('bynder_drupal_url', $str)) {
+        return $str;
+    } else {
+        error_log("Invalid Bynder Drupal URL: " . $str );
+        return FALSE;
+    }
+};

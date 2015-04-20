@@ -16,7 +16,7 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
         } else {
             $parameters = media_bynder_uri_parse_style_url($this->uri);
             if($parameters){
-                return media_bynder_embed_url($parameters['i'], $parameters['style']);
+                return media_bynder_embed_url($parameters['i'], $parameters['style'], $parameters['effects']);
             }
             return FALSE;
         }

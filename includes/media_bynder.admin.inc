@@ -31,8 +31,65 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     }
 
     $data['bynder_search'] = media_bynder_generate_search($form_state);
+    $data['selected_asset'] = array(
+      '#type' => 'hidden',
+      '#default_value' => FALSE
+    );
+
+    $selected_asset = media_bynder_parameter($_POST, 'selected_asset');
+    if ($selected_asset) {
+        $asset_data = media_bynder_uri_parse_url($selected_asset);
+        $id = $asset_data['i'];
+        $idHash = $asset_data['f'];
+        $result = media_bynder_save_image($id, $idHash);
+        if(!$result['success']){
+            drupal_set_message(t($result['message']), 'error');
+        }else{
+            drupal_goto('/media/browser', array('query' => array(
+                'render' => 'media-popup',
+                'fid' => $result['fid']
+            )));
+        }
+    }
 
     return array('bynder' => $data);
+}
+
+function media_bynder_save_image($id, $idHash){
+    $rest_client = media_bynder_rest_client();
+    $result = $rest_client->getMediaObject($id);
+
+    if ($result) {
+        $arr_json = json_decode($result, TRUE);
+    } else {
+        return array('success' => 0, 'message' => $rest_client->error);
+    }
+
+    $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
+    $file = file_uri_to_object($uri, TRUE);
+
+    if ($arr_json['type'] == 'image') {
+        $file->filemime = 'image/jpeg';
+    }
+    $file->filesize = 0;
+    $file->filename = $arr_json['name'];
+
+    if ($file === FALSE) {
+        return array('success' => 0, 'message' => 'An error occurred and no file was added to your Library.');
+    } elseif (!property_exists($file, 'fid')) {
+        $file = file_save($file);
+        field_attach_submit('media', $file, $form, $form_state);
+        $file->file = array();
+        $file->file[LANGUAGE_NONE] = array();
+        $file->file[LANGUAGE_NONE][0] = (array) $file + array(
+            'display' => TRUE
+        );
+        $file->is_new = TRUE;
+        field_attach_insert('media', $file);
+        return array('success' => 1, 'message' => 'Successfully added media to Library', 'fid' => $file->fid);
+    } else {
+        return array('success' => 1, 'message' => 'Already exists in Library', 'fid' => $file->fid);
+    }
 }
 
 /**
@@ -565,41 +622,11 @@ function media_bynder_submit_mob(&$form, &$form_state) {
 
     $redirect = 'media_bynder_add';
 
-    $rest_client = media_bynder_rest_client();
-    $result = $rest_client->getMediaObject($id);
-
-    if ($result) {
-        $arr_json = json_decode($result, TRUE);
-    } else {
-        echo '{"success": 0, "type": "error", "message": "' . $rest_client->error . '"}';
-        exit;
-    }
-
-    $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
-    $file = file_uri_to_object($uri, TRUE);
-
-    if ($arr_json['type'] == 'image') {
-        $file->filemime = 'image/jpeg';
-    }
-
-    $file->filesize = @filesize($uri);
-    $file->filename = $arr_json['name'];
-
-    if ($file === FALSE) {
-        echo '{"success": 0, "type": "error", "message": "' . t('An error occurred and no file was added to your Library.') . '"}';
-    } elseif (!property_exists($file, 'fid')) {
-        $file = file_save($file);
-        field_attach_submit('media', $file, $form, $form_state);
-        $file->file = array();
-        $file->file[LANGUAGE_NONE] = array();
-        $file->file[LANGUAGE_NONE][0] = (array) $file + array(
-            'display' => TRUE
-        );
-        $file->is_new = TRUE;
-        field_attach_insert('media', $file);
-        echo '{"success": 1, "type": "success", "message": "' . t('Successfully added media to Library') . '"}';
-    } else {
-        echo '{"success": 0, "type": "warning", "message": "' . t('Already exists in Library') . '"}';
+    $result = media_bynder_save_image($id, $idHash);
+    if(!$result['success']){
+        echo '{"success": 0, "type": "error", "message": "' . $result['message'] . '"}';
+    }else{
+        echo '{"success": 1, "type": "success", "message": "' . t($result['message']) . '"}';
     }
     exit;
 }

@@ -1,5 +1,9 @@
 (function ($) {
-    function showAlert(message, type) {
+    'use strict';
+
+    var spinner;
+
+    var showAlert = function(message, type) {
         var alert = $('#edit-bynder-search .alert');
             alert.find('span.text').text(message);
             alert.removeClass('alert-warning').removeClass('alert-success').removeClass('alert-error');
@@ -8,7 +12,56 @@
         setTimeout(function() {
             alert.fadeOut(1000);
         }, 2500);
-    }
+    };
+
+    var showSpinner = function(element) {
+        spinner = new Spinner({
+            lines: 13,
+            length: 20,
+            width: 10,
+            radius: 30,
+            corners: 1,
+            rotate: 0,
+            direction: 1,
+            color: '#000',
+            speed: 1,
+            trail: 60,
+            shadow: false,
+            hwaccel: false,
+            className: 'spinner',
+            zIndex: 2e9,
+            top: '50%',
+            left: '50%'
+        }).spin(element);
+    };
+
+    // Public variables/methods
+    var isValid = function(type, val){
+        switch(type){
+            case "uuid":
+                return /^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$/.test(val);
+            case "idHash":
+                return /[a-f0-9]{16}/.test(val);
+        }
+        return true;
+    };
+
+    var validateUUID = function(str){
+        if (isValid("uuid", str)) {
+            return str;
+        } else {
+            throw "Invalid UUID: "+str;
+        }
+    };
+
+    var validateIdHash = function(str){
+        if (isValid("idHash", str)) {
+            return str;
+        } else {
+            throw "Invalid IDHash: "+str;
+        }
+    };
+
     $(document).ready(function(){
         $('#edit-bynder-search .normal_facet_list > .facet_title').click(function() {
             $(this).find('.expand i').toggleClass('fa-angle-down').toggleClass('fa-angle-up');
@@ -79,63 +132,39 @@
             var $image = $(e.currentTarget);
             $image.addClass('loading');
 
-            var spinner = new Spinner({
-                lines: 13,
-                length: 20,
-                width: 10,
-                radius: 30,
-                corners: 1,
-                rotate: 0,
-                direction: 1,
-                color: '#000',
-                speed: 1,
-                trail: 60,
-                shadow: false,
-                hwaccel: false,
-                className: 'spinner',
-                zIndex: 2e9,
-                top: '50%',
-                left: '50%'
-            }).spin($image[0]);
+            showSpinner($image[0]);
 
             var id = $image.attr('data-id');
             var idHash = $image.attr('data-idHash');
 
-            $.ajax({
-                url: '/?q=admin/content/media/add/media_bynder',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    id: id,
-                    idHash: idHash
-                },
-                success: function(data) {
-                    $image.removeClass('loading');
-                    spinner.stop();
-                    showAlert(data.message, data.type);
-                }
-            });
+            var media_library_mode = $('body').hasClass('page-admin-content-media-add-media-bynder');
+
+            if(media_library_mode){
+                $.ajax({
+                    url: '/?q=admin/content/media/add/media_bynder',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        id: id,
+                        idHash: idHash
+                    },
+                    success: function(data) {
+                        $image.removeClass('loading');
+                        spinner.stop();
+                        showAlert(data.message, data.type);
+                    }
+                });
+            }else{
+                $('input[name="selected_asset"]').val('bynder://f/' + validateUUID(id) + '/i/' + validateIdHash(idHash));
+                $('#media-bynder-add').submit();
+            }
         });
 
         $('#media-bynder-add').submit(function() {
-            var spinner = new Spinner({
-                lines: 13,
-                length: 20,
-                width: 10,
-                radius: 30,
-                corners: 1,
-                rotate: 0,
-                direction: 1,
-                color: '#000',
-                speed: 1,
-                trail: 60,
-                shadow: false,
-                hwaccel: false,
-                className: 'spinner',
-                zIndex: 2e9,
-                top: '50%',
-                left: '50%'
-            }).spin($('#edit-bynder-search')[0]);
+            var media_library_mode = $('body').hasClass('page-admin-content-media-add-media-bynder');
+            if(media_library_mode){
+                showSpinner($('#edit-bynder-search')[0]);
+            }
         });
     });
 })(jQuery);

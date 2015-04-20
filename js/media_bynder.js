@@ -3,7 +3,7 @@
 
     var spinner;
 
-    function showAlert(message, type) {
+    var showAlert = function(message, type) {
         var alert = $('#edit-bynder-search .alert');
             alert.find('span.text').text(message);
             alert.removeClass('alert-warning').removeClass('alert-success').removeClass('alert-error');
@@ -12,9 +12,9 @@
         setTimeout(function() {
             alert.fadeOut(1000);
         }, 2500);
-    }
+    };
 
-    function showSpinner(element) {
+    var showSpinner = function(element) {
         spinner = new Spinner({
             lines: 13,
             length: 20,
@@ -33,7 +33,34 @@
             top: '50%',
             left: '50%'
         }).spin(element);
-    }
+    };
+
+    // Public variables/methods
+    var isValid = function(type, val){
+        switch(type){
+            case "uuid":
+                return /^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$/.test(val);
+            case "idHash":
+                return /[a-f0-9]{16}/.test(val);
+        }
+        return true;
+    };
+
+    var validateUUID = function(str){
+        if (isValid("uuid", str)) {
+            return str;
+        } else {
+            throw "Invalid UUID: "+str;
+        }
+    };
+
+    var validateIdHash = function(str){
+        if (isValid("idHash", str)) {
+            return str;
+        } else {
+            throw "Invalid IDHash: "+str;
+        }
+    };
 
     $(document).ready(function(){
         $('#edit-bynder-search .normal_facet_list > .facet_title').click(function() {
@@ -128,7 +155,7 @@
                     }
                 });
             }else{
-                $('input[name="selected_asset"]').val('bynder://f/' + id + '/i/' + idHash);
+                $('input[name="selected_asset"]').val('bynder://f/' + validateUUID(id) + '/i/' + validateIdHash(idHash));
                 $('#media-bynder-add').submit();
             }
         });

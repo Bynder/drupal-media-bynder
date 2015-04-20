@@ -581,8 +581,9 @@ function media_bynder_submit_mob(&$form, &$form_state) {
     if ($arr_json['type'] == 'image') {
         $file->filemime = 'image/jpeg';
     }
-
-    $file->filesize = @filesize($uri);
+    if(filesize($uri)){
+        $file->filesize = @filesize($uri);
+    }
     $file->filename = $arr_json['name'];
 
     if ($file === FALSE) {

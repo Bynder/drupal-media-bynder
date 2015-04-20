@@ -31,6 +31,62 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     }
 
     $data['bynder_search'] = media_bynder_generate_search($form_state);
+    $data['selected_asset'] = array(
+      '#type' => 'hidden',
+      '#default_value' => FALSE
+    );
+
+
+    // TODO: Move this to other functions.
+    $selected_asset = media_bynder_parameter($_POST, 'selected_asset');
+    if ($selected_asset) {
+        $asset_data = media_bynder_uri_parse_url($selected_asset);
+
+        $id = $asset_data['i'];
+        $idHash = $asset_data['f'];
+
+        $rest_client = media_bynder_rest_client();
+        $result = $rest_client->getMediaObject($id);
+
+        if ($result) {
+            $arr_json = json_decode($result, TRUE);
+        } else {
+            drupal_set_message($rest_client->error, 'error');
+            return;
+        }
+
+        $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
+        $file = file_uri_to_object($uri, TRUE);
+
+        if ($arr_json['type'] == 'image') {
+            $file->filemime = 'image/jpeg';
+        }
+        if(filesize($uri)){
+            $file->filesize = @filesize($uri);
+        }
+        $file->filename = $arr_json['name'];
+
+        if ($file === FALSE) {
+            drupal_set_message(t('An error occurred and no file was added to your Library.'), 'error');
+            return;
+        } elseif (!property_exists($file, 'fid')) {
+            $file = file_save($file);
+            field_attach_submit('media', $file, $form, $form_state);
+            $file->file = array();
+            $file->file[LANGUAGE_NONE] = array();
+            $file->file[LANGUAGE_NONE][0] = (array) $file + array(
+                'display' => TRUE
+            );
+            $file->is_new = TRUE;
+            field_attach_insert('media', $file);
+            // Successfully added media to Library
+            drupal_goto('/media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
+        } else {
+            // Already exists in Library
+            drupal_goto('/media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
+        }
+    }
+
 
     return array('bynder' => $data);
 }

@@ -1,7 +1,7 @@
 drupal-media-bynder
 ====================
 
-This configuration guide is based on the standard drupal installation, the current version of drupal is 7.25. Any issues can be reported to [github] (https://github.com/LabelA/drupal-media-bynder/issues).
+This configuration guide is based on the standard drupal installation, the current version of drupal is 7.x. Any issues can be reported to [github] (https://github.com/LabelA/drupal-media-bynder/issues).
 
 For more information please visit [www.getbynder.com](http://www.getbynder.com) or contact us at [info@getbynder.com](mailto:info@getbynder.com)
 
@@ -23,6 +23,10 @@ Versions matter!
 *   [Media 2.x] (https://drupal.org/project/media)
 *   [OAuth 3.x] (https://drupal.org/project/oauth)
 *   [File Entity 2.x] (https://www.drupal.org/project/file_entity)
+*   [WYSIWYG 2.x] (https://www.drupal.org/project/wysiwyg)
+*   [CTools 1.x] (https://www.drupal.org/project/ctools)
+*   [Views 3.x] (https://www.drupal.org/project/views)
+*   [CKEditor 3.x] (http://ckeditor.com/download)
 
 Go to the "Modules" panel in your admin view and enable the listed modules.
 
@@ -45,4 +49,3 @@ In order to include media from Bynder into Drupal, go to Content and click the l
 Enter a search term and/or click any of the provided facets.
 Select an image by clicking on it.
 A confirmation "Successfully added media to Library" will be shown and the media file will be available for usage in the Library.
-

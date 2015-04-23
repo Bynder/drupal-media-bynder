@@ -324,7 +324,7 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
         if(count($facet_category) < 2){
             continue;
         }
-        $children = media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties);
+
         $labels = array(
             'brandId' => t('Brands'),
             'subBrandId' => t('Sub-brands'),
@@ -332,26 +332,36 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
             'type' => t('Type'),
             'orientation' => t('Orientation')
         );
-        if(!isset($labels[$facet_category_name])){
+        // Meta properties start with 'property_'
+        if (strpos($facet_category_name, 'property_') === 0) {
+            $meta_property_name = substr($facet_category_name, strlen('property_'));
+            foreach($meta_properties as $meta_property) {
+                if ($meta_property_name == $meta_property['name']) {
+                    $meta_property_name = $meta_property['label'];
+                    break;
+                }
+            }
+            $labels[$facet_category_name] = $meta_property_name;
+        } elseif(!isset($labels[$facet_category_name])){
             $labels[$facet_category_name] = t($facet_category_name);
         }
-        // $labels = array_merge($meta_property_labels, $labels);
         $icons = array(
             'brandId' => 'archive',
             'subBrandId' => 'briefcase',
             'tags' => 'tags',
             'type' => 'file',
-            'orientation' => 'image',
+            'orientation' => 'image'
         );
+        $children = media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties);
         $facet_category = array(
             'data' => "<span><i class='fa fa-" . filter_xss(isset($icons[$facet_category_name]) ? $icons[$facet_category_name] : 'caret-right'). "'></i> " . filter_xss($labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
-            'id' => $facet_category_name,
+            'id' => str_replace(" ", "-", $facet_category_name),
             'class' => array(
                 'facet_title'
             ),
             'children' => $children
         );
-        if(count($children)){
+        if (count($children)) {
             $facets_list['#items'][] = $facet_category;
         }
     }
@@ -364,19 +374,20 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
 function media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties) {
     $facet_links = array();
 
-    $meta_property_labels = [];
-    foreach($meta_properties as $meta_property) {
-        foreach($meta_property['options'] as $meta_property_option) {
-            $meta_property_labels[$meta_property_option['name']] = $meta_property_option['label'];
-        }
-    }
-
     foreach ($facet_category as $facet_id => $facet_count) {
-        if($facet_category_name == 'brandId'){
+        if($facet_category_name == 'brandId') {
             $facet_name = media_bynder_get_brand_name($brands, $facet_id);
-        }elseif(isset($meta_property_labels[$facet_id])){
-            $facet_name = $meta_property_labels[$facet_id];
-        }else{
+        } elseif (strpos($facet_category_name, 'property_') === 0) {
+            $facet_name = $facet_id;
+            foreach ($meta_properties as $meta_property) {
+                foreach ($meta_property['options'] as $meta_property_option) {
+                    if ($facet_id === $meta_property_option['name']) {
+                        $facet_name = $meta_property_option['label'];
+                        break;
+                    }
+                }
+            }
+        } else {
             $facet_name = $facet_id;
         }
         $filter_key = $facet_category_name;
@@ -394,7 +405,7 @@ function media_bynder_generate_facets_link($facet_category, $facet_category_name
 
 function media_bynder_get_brand_name($brands, $brand_id) {
     foreach($brands as $brand){
-        if($brand['id'] == $brand_id){
+        if($brand['id'] == $brand_id) {
             return $brand['name'];
         }
     }
@@ -460,6 +471,7 @@ function media_bynder_remove_hidden_facets($available_facets, $selected_facets) 
 function media_bynder_brands() {
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->brands();
+    $arr_json = [];
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);

@@ -317,7 +317,7 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
     );
 
     foreach ($facets as $facet_category_name => $facet_category) {
-        if($facet_category_name == 'categoryId'){
+        if($facet_category_name == 'categoryId' || $facet_category_name == 'subBrandId') {
             continue;
         }
         //Hide single item filters.
@@ -327,7 +327,6 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
 
         $labels = array(
             'brandId' => t('Brands'),
-            'subBrandId' => t('Sub-brands'),
             'tags' => t('Tags'),
             'type' => t('Type'),
             'orientation' => t('Orientation')
@@ -347,7 +346,6 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
         }
         $icons = array(
             'brandId' => 'archive',
-            'subBrandId' => 'briefcase',
             'tags' => 'tags',
             'type' => 'file',
             'orientation' => 'image'

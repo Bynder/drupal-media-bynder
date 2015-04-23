@@ -317,7 +317,9 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
     );
 
     foreach ($facets as $facet_category_name => $facet_category) {
-        if($facet_category_name == 'categoryId' || $facet_category_name == 'subBrandId') {
+        if ($facet_category_name == 'categoryId' ||
+            $facet_category_name == 'subBrandId')
+        {
             continue;
         }
         //Hide single item filters.
@@ -332,8 +334,9 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
             'orientation' => t('Orientation')
         );
         // Meta properties start with 'property_'
-        if (strpos($facet_category_name, 'property_') === 0) {
-            $meta_property_name = substr($facet_category_name, strlen('property_'));
+        $metaproperty_prefix = 'property_';
+        if (strpos($facet_category_name, $metaproperty_prefix) === 0) {
+            $meta_property_name = substr($facet_category_name, strlen($metaproperty_prefix));
             foreach($meta_properties as $meta_property) {
                 if ($meta_property_name == $meta_property['name']) {
                     $meta_property_name = $meta_property['label'];
@@ -353,7 +356,7 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
         $children = media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties);
         $facet_category = array(
             'data' => "<span><i class='fa fa-" . filter_xss(isset($icons[$facet_category_name]) ? $icons[$facet_category_name] : 'caret-right'). "'></i> " . filter_xss($labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
-            'id' => str_replace(" ", "-", $facet_category_name),
+            'id' => preg_replace('/\s+/', '-', $facet_category_name),
             'class' => array(
                 'facet_title'
             ),
@@ -373,9 +376,10 @@ function media_bynder_generate_facets_link($facet_category, $facet_category_name
     $facet_links = array();
 
     foreach ($facet_category as $facet_id => $facet_count) {
+        $metaproperty_prefix = 'property_';
         if($facet_category_name == 'brandId') {
             $facet_name = media_bynder_get_brand_name($brands, $facet_id);
-        } elseif (strpos($facet_category_name, 'property_') === 0) {
+        } elseif (strpos($facet_category_name, $metaproperty_prefix) === 0) {
             $facet_name = $facet_id;
             foreach ($meta_properties as $meta_property) {
                 foreach ($meta_property['options'] as $meta_property_option) {

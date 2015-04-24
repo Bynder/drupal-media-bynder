@@ -142,6 +142,7 @@ class BynderRestClient {
             $limited_meta_property['id'] = $meta_property->id;
             $limited_meta_property['label'] = $meta_property->label;
             $limited_meta_property['name'] = $meta_property->name;
+            $limited_meta_property['zindex'] = $meta_property->zindex;
 
             foreach($meta_property->options as $option){
                 $limited_meta_property['options'][] = array(
@@ -150,7 +151,7 @@ class BynderRestClient {
                     "name" => $option->name
                 );
             }
-            if(isset($limited_meta_property['options']) && count($limited_meta_property['options'])){
+            if(isset($limited_meta_property['options']) && count($limited_meta_property['options']) > 0) {
                 $limited_meta_properties[] = $limited_meta_property;
             }
         }

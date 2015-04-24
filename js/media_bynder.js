@@ -107,20 +107,20 @@
             var exists = ($.grep(current_filters.filters, function(e, i){
                 return e.key == filter_key;
             }).length);
-            if(!exists){
-                //Add current filter from list
-                current_filters.filters.push({
-                    key: filter_key,
-                    value: filter_value,
-                });
-                link.addClass('active');
-            }else{
-                //Remove current filter from list
+            if (exists) {
+                 //Remove current filter from list
                 current_filters.filters = $.grep(current_filters.filters, function(e, i){
                     return e.key != filter_key;
                 });
                 link.removeClass('active');
             }
+
+            // Add current filter to list
+            current_filters.filters.push({
+                key: filter_key,
+                value: filter_value,
+            });
+            link.addClass('active');
 
             filters_input.val(JSON.stringify(current_filters));
             $('#media-bynder-add').submit();

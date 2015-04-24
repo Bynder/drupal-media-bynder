@@ -109,18 +109,24 @@ function media_bynder_generate_search($state) {
     $results = media_bynder_search_results($search, $filters, $meta_properties);
     $available_facets = $results['count'];
 
+    // Create search section
     $data['search'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Search'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#attributes' => array(
+        'class' => array(
+          'bynder-search-form',
+        ),
+      ),
+    );
+    $data['search']['field'] = array(
         '#type' => 'textfield',
-        '#title' => t('Search'),
-        '#default_value' => $search !== NULL ? $search : '',
+        '#default_value' => isset($search) ? $search : '',
         '#description' => "<p class='alert alert-warning' style='display:none'><span class='text'></span></p>",
     );
-
-    $data['selected_facets'] = media_bynder_generate_selected_facets($filters);
-
-    $data['facets'] = media_bynder_generate_facets($available_facets, $selected_facets, $brands, $meta_properties);
-
-    $data['button'] = array(
+    $data['search']['button'] = array(
         '#type' => 'button',
         '#value' => t('Search'),
         '#submit' => array(
@@ -128,11 +134,16 @@ function media_bynder_generate_search($state) {
         )
     );
 
+    $data['selected_facets'] = media_bynder_generate_selected_facets($filters);
+
+    $data['facets'] = media_bynder_generate_facets($available_facets, $selected_facets, $brands, $meta_properties);
+
     $data['filters'] = array(
       '#type' => 'hidden',
       '#default_value' => (json_encode($filters) != '[]') ? json_encode($filters) : '{"filters": []}'
     );
 
+    // Create the results section
     $data['results'] = media_bynder_generate_results($results);
 
     if (isset($results['totalNrOfResults'])) {
@@ -311,6 +322,8 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
         '#theme' => 'item_list',
         '#type' => 'ul',
         '#title' => t('Facets'),
+        '#prefix' => '<div class="normal-facet-list-wrapper">',
+        '#suffix' => '</div>',
         '#attributes' => array(
             'class' => 'normal_facet_list facet_list'
         )
@@ -573,7 +586,10 @@ function media_bynder_generate_results($results) {
 
     if (!empty($results)) {
         foreach ($results as $media_item) {
+          // TODO: replace this check with a link or alternative to show a image that doesn't have a thumbnail
+          if (!empty($media_item['thumbnails']['thul'])) {
             $output['#items'][] = media_bynder_generate_result_current($media_item);
+          }
         }
     } else {
         return FALSE;

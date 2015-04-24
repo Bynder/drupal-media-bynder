@@ -1,3 +1,7 @@
+form#media-bynder-add {
+    margin: 0;
+}
+
 #edit-bynder-search {
     padding: 0;
     overflow: hidden;
@@ -5,6 +9,7 @@
     -webkit-border-radius: 5px;
        -moz-border-radius: 5px;
             border-radius: 5px;
+    margin: 0;
 }
 
 #edit-bynder-search a {
@@ -23,18 +28,19 @@
     text-decoration: none;
 }
 
+#edit-bynder-search .fa-caret-right:before {
+	display:none;
+}
+
 #edit-bynder-search .fieldset-wrapper {
-    padding: 25px;
+    padding: 1em;
     padding-top: 0;
 }
 
-#edit-bynder-search .form-item-search {
+#edit-bynder-search .bynder-search-form .fieldset-wrapper {
     position: relative;
-
-    margin-right: -25px;
-    margin-left: -25px;
-    padding: 15px 25px;
-
+    margin: 0 -25px;
+    padding: 1em 2em;
     border-bottom: 1px solid #ddd;
     background-color: #f9f9f9;
 }
@@ -64,13 +70,39 @@
     margin-bottom: 10px;
 }
 
+#edit-bynder-search .bynder-search-form {
+    margin:0;
+}
+
+#edit-bynder-search .bynder-search-form legend {
+    text-align:right;
+}
+
+#edit-bynder-search .bynder-search-form .form-type-textfield {
+    display: inline-block;
+}
+
+#edit-bynder-search .normal-facet-list-wrapper {
+    display:inline-block;
+    margin: 0.5em 0;
+}
+
+#edit-bynder-search h3 {
+    font-size: 16pt;
+    margin: 0 0 0.25em;
+}
+
+#edit-bynder-search .item-list {
+    clear:both;
+}
+
 #edit-bynder-search .item-list:before,
 #edit-bynder-search .item-list:after,
 #edit-bynder-search .item-list .facet_list:after,
 #edit-bynder-search .item-list .facet_list:before {
-    display: table;
+    display: inline-block;
 
-    content: ' ';
+    /* content: ' '; */
 }
 
 #edit-bynder-search .item-list:after,
@@ -79,12 +111,21 @@
 }
 
 #edit-bynder-search .item-list .facet_list {
-    margin-left: -2%;
+    padding-left: 0;
 }
 
 #edit-bynder-search .item-list .facet_list .facet_title {
   max-height: 290px;
-  overflow-y: scroll;
+}
+
+#edit-bynder-search .item-list .facet_list .facet_title > .item-list ul {
+    padding:1em;
+    vertical-align:top;
+    margin-top: -1.2em;
+}
+
+#edit-bynder-search ul ul {
+  overflow-y: auto;
 }
 
 #edit-bynder-search .item-list .facet_list .facet_title ul li {
@@ -139,14 +180,9 @@
 }
 
 #edit-bynder-search .item-list .facet_list > .facet_title {
-    display: block;
-    float: left;
-    width: 23%;
-    margin: 0;
-    margin-left: 2%;
-    overflow-y: scroll;
+    display: inline-block;
+    margin: 0 1em 0 0;
 
-    vertical-align: text-top;
 
     list-style-type: none;
     cursor: pointer;
@@ -157,28 +193,40 @@
     z-index: 10;
 
     display: none;
-    width: 23%;
     overflow: hidden;
 
     background-color: #fff;
+    border-radius: 0 0 3px 3px;
+    border: solid thin #ddd;
 }
 
 #edit-bynder-search .item-list .facet_list .facet_title > span {
-    display: block;
+    /* display: block; */
     margin-bottom: 10px;
-
     font-weight: bold;
 }
 
 #edit-bynder-search .item-list .facet_list .facet_title > span .expand {
-    float: right;
+  float: right;
+  font-size: 20px;
+  padding: 0 0.5em;
+}
 
-    font-size: 20px;
+#edit-bynder-search .item-list .selected_facet_list .facet_title > span {
+    padding: 0.5em;
+    border: solid thin #ddd;
+    background:#eee;
+}
+
+#edit-bynder-search .item-list .selected_facet_list .facet_title > span .expand {
+    padding:0;
+    margin-left:0.5em;
 }
 
 #edit-bynder-search input.form-submit {
-    margin-top: 20px;
-    padding: 10px 15px;
+    margin: 0.25em 1em;
+    display: inline-block;
+    padding: 0.5em 1em;
 
     color: #fff;
 
@@ -211,7 +259,7 @@
 
 #edit-bynder-search .item-list .result_list li {
     display: inline-block;
-    margin: 10px;
+    margin: 0.5em 0.25em;   min-width: 230px;
 }
 
 #edit-bynder-search .item-list .result_list {
@@ -234,8 +282,8 @@
     position: relative;
 
     display: block;
-    width: 200px;
-    padding: 15px;
+    max-width: 200px;
+    padding: 1em;
 
     color: #444;
     text-align: center;
@@ -266,7 +314,7 @@
 
 #edit-bynder-search .item-list .result_list li a .image-holder {
     height: 120px;
-    margin-bottom: 15px;
+    margin-bottom: 1em;
     overflow: hidden;
 
     -webkit-border-radius: 3px;

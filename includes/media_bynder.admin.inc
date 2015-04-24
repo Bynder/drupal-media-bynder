@@ -130,8 +130,8 @@ function media_bynder_generate_search($state) {
     $data['search'] = array(
       '#type' => 'fieldset',
       '#title' => t('Search'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
       '#attributes' => array(
         'class' => array(
           'bynder-search-form',

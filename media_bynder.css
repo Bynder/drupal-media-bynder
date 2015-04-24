@@ -29,7 +29,7 @@ form#media-bynder-add {
 }
 
 #edit-bynder-search .fa-caret-right:before {
-	display:none;
+    display:none;
 }
 
 #edit-bynder-search .fieldset-wrapper {
@@ -101,8 +101,6 @@ form#media-bynder-add {
 #edit-bynder-search .item-list .facet_list:after,
 #edit-bynder-search .item-list .facet_list:before {
     display: inline-block;
-
-    /* content: ' '; */
 }
 
 #edit-bynder-search .item-list:after,
@@ -201,7 +199,6 @@ form#media-bynder-add {
 }
 
 #edit-bynder-search .item-list .facet_list .facet_title > span {
-    /* display: block; */
     margin-bottom: 10px;
     font-weight: bold;
 }

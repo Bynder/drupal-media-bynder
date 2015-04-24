@@ -1,5 +1,5 @@
 {
-    "name": "Bynder/drupal-media-bynder",
+    "name": "bynder/drupal-media-bynder",
     "type": "drupal-module",
     "description": "A Drupal module to integrate Bynder with the Media module"
 }

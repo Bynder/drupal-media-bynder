@@ -527,6 +527,10 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
             }
         }
     }
+
+    if (isset($search) && strlen($search) > 0) {
+        $query .= '&keyword='.urlencode($search);
+    }
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->search($query, $start_index, $nr_of_results);
 

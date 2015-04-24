@@ -64,6 +64,12 @@
 
     $(document).ready(function(){
         $('#edit-bynder-search .normal_facet_list > .facet_title').click(function() {
+            var $filters = $(this).siblings();
+            $filters.find('.expand i.fa-angle-up')
+                .addClass('fa-angle-down')
+                .removeClass('fa-angle-up');
+            $filters.find('.item-list:visible').slideUp(300);
+
             $(this).find('.expand i').toggleClass('fa-angle-down').toggleClass('fa-angle-up');
             $(this).find(' > .item-list').slideToggle(300);
         });

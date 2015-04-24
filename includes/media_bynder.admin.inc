@@ -116,7 +116,7 @@ function media_bynder_generate_search($state) {
         '#description' => "<p class='alert alert-warning' style='display:none'><span class='text'></span></p>",
     );
 
-    $data['selected_facets'] = media_bynder_generate_selected_facets($filters);
+    $data['selected_facets'] = media_bynder_generate_selected_facets($filters, $meta_properties);
 
     $data['facets'] = media_bynder_generate_facets($available_facets, $selected_facets, $brands, $meta_properties);
 
@@ -272,10 +272,17 @@ function media_bynder_parse_selected_facets($selected_facets) {
     return FALSE;
 }
 
-function media_bynder_generate_selected_facets($selected_facets) {
+function media_bynder_generate_selected_facets($selected_facets, $meta_properties) {
     if (empty($selected_facets)) {
         return array();
     }
+
+    $filter_labels = array(
+        'brandId' => t('Brands'),
+        'tags' => t('Tags'),
+        'type' => t('Type'),
+        'orientation' => t('Orientation')
+    );
 
     $facets_list = array(
         '#theme' => 'item_list',
@@ -286,12 +293,27 @@ function media_bynder_generate_selected_facets($selected_facets) {
         )
     );
     foreach ($selected_facets as $selected_facet) {
+        // Meta properties start with 'property_'
+        $metaproperty_prefix = 'property_';
+        if (strpos($selected_facet->key, $metaproperty_prefix) === 0) {
+            $meta_property_name = substr($selected_facet->key, strlen($metaproperty_prefix));
+            foreach($meta_properties as $meta_property) {
+                if ($meta_property_name == $meta_property['name']) {
+                    $meta_property_name = $meta_property['label'];
+                    break;
+                }
+            }
+            $filter_labels[$selected_facet->key] = $meta_property_name;
+        } elseif(!isset($filter_labels[$selected_facet->key])){
+            $filter_labels[$selected_facet->key] = t($selected_facet->key);
+        }
+
         $facet_category = array(
-            'data' => "<span>" . $selected_facet->key . "<span class='expand'><i class='fa fa-times'></i></span></span>",
+            'data' => "<span>" . filter_xss($filter_labels[$selected_facet->key]) . "<span class='expand'><i class='fa fa-times'></i></span></span>",
             'class' => array(
                 'facet_title'
             ),
-            'data-filter-key' => $selected_facet->key
+            'data-filter-key' => filter_xss($selected_facet->key)
         );
         $facets_list['#items'][] = $facet_category;
     }
@@ -316,6 +338,13 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
         )
     );
 
+    $filter_labels = array(
+        'brandId' => t('Brands'),
+        'tags' => t('Tags'),
+        'type' => t('Type'),
+        'orientation' => t('Orientation')
+    );
+
     foreach ($facets as $facet_category_name => $facet_category) {
         if ($facet_category_name == 'categoryId' ||
             $facet_category_name == 'subBrandId')
@@ -327,12 +356,6 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
             continue;
         }
 
-        $labels = array(
-            'brandId' => t('Brands'),
-            'tags' => t('Tags'),
-            'type' => t('Type'),
-            'orientation' => t('Orientation')
-        );
         // Meta properties start with 'property_'
         $metaproperty_prefix = 'property_';
         if (strpos($facet_category_name, $metaproperty_prefix) === 0) {
@@ -343,9 +366,9 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
                     break;
                 }
             }
-            $labels[$facet_category_name] = $meta_property_name;
-        } elseif(!isset($labels[$facet_category_name])){
-            $labels[$facet_category_name] = t($facet_category_name);
+            $filter_labels[$facet_category_name] = $meta_property_name;
+        } elseif(!isset($filter_labels[$facet_category_name])){
+            $filter_labels[$facet_category_name] = t($facet_category_name);
         }
         $icons = array(
             'brandId' => 'archive',
@@ -355,7 +378,7 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands, $meta_
         );
         $children = media_bynder_generate_facets_link($facet_category, $facet_category_name, $selected_facets, $brands, $meta_properties);
         $facet_category = array(
-            'data' => "<span><i class='fa fa-" . filter_xss(isset($icons[$facet_category_name]) ? $icons[$facet_category_name] : 'caret-right'). "'></i> " . filter_xss($labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
+            'data' => "<span><i class='fa fa-" . filter_xss(isset($icons[$facet_category_name]) ? $icons[$facet_category_name] : 'caret-right'). "'></i> " . filter_xss($filter_labels[$facet_category_name]) . "<span class='expand'><i class='fa fa-angle-down'></i></span></span>",
             'id' => preg_replace('/\s+/', '-', $facet_category_name),
             'class' => array(
                 'facet_title'

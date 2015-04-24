@@ -1,7 +1,7 @@
 drupal-media-bynder
 ====================
 
-This configuration guide is based on the standard drupal installation, the current version of drupal is 7.x. Any issues can be reported to [github] (https://github.com/LabelA/drupal-media-bynder/issues).
+This configuration guide is based on the standard drupal installation, the current version of drupal is 7.x. Any issues can be reported to [github] (https://github.com/Bynder/drupal-media-bynder/issues).
 
 For more information please visit [www.getbynder.com](http://www.getbynder.com) or contact us at [info@getbynder.com](mailto:info@getbynder.com)
 

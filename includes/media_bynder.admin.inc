@@ -9,8 +9,6 @@
 
 include_once 'BynderRestClient.inc';
 
-global $filter_labels;
-
 /**
  * Create a form to add media from Bynder.
  */
@@ -99,6 +97,9 @@ function media_bynder_save_image($id, $idHash){
  */
 function media_bynder_generate_search($state) {
     global $filter_labels;
+    global $meta_property_prefix;
+    $meta_property_prefix = 'property_';
+
     $data = array('#type' => 'fieldset');
 
     $rest_client = media_bynder_rest_client();
@@ -111,9 +112,9 @@ function media_bynder_generate_search($state) {
         'orientation' => t('Orientation')
     );
     foreach($meta_properties as $meta_property) {
-        $filter_labels['property_'.$meta_property['name']] = $meta_property['label'];
+        $filter_labels[$meta_property_prefix . $meta_property['name']] = $meta_property['label'];
         foreach ($meta_property['options'] as $meta_property_option) {
-            $filter_labels['property_'.$meta_property_option['name']] = $meta_property_option['label'];
+            $filter_labels[$meta_property_prefix . $meta_property_option['name']] = $meta_property_option['label'];
         }
     }
 
@@ -304,7 +305,6 @@ function media_bynder_generate_selected_facets($selected_facets) {
     );
     foreach ($selected_facets as $selected_facet) {
         $selected_facet_key = $selected_facet->key;
-        // Meta properties start with 'property_'
         if(!isset($filter_labels[$selected_facet_key])){
             $filter_labels[$selected_facet_key] = t($selected_facet_key);
         }
@@ -351,7 +351,6 @@ function media_bynder_generate_facets($facets, $selected_facets, $brands) {
             continue;
         }
 
-        // Meta properties start with 'property_'
         if(!isset($filter_labels[$facet_category_name])){
             $filter_labels[$facet_category_name] = t($facet_category_name);
         }

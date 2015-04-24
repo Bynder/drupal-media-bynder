@@ -114,7 +114,7 @@ function media_bynder_generate_search($state) {
     foreach($meta_properties as $meta_property) {
         $filter_labels[$meta_property_prefix . $meta_property['name']] = $meta_property['label'];
         foreach ($meta_property['options'] as $meta_property_option) {
-            $filter_labels[$meta_property_prefix . $meta_property_option['name']] = $meta_property_option['label'];
+            $filter_labels[$meta_property_option['name']] = $meta_property_option['label'];
         }
     }
 
@@ -518,7 +518,7 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
         $start_index = $current_page * $nr_of_results;
     }
     $selected_facets_meta_properties = [];
-    foreach($meta_properties as $meta_property){
+    foreach($meta_properties as $meta_property) {
         foreach($meta_property['options'] as $meta_property_option){
             $selected_facets_meta_properties[$meta_property['name']][$meta_property_option['name']] = $meta_property_option['id'];
         }

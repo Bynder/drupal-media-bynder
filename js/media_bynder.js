@@ -64,6 +64,12 @@
 
     $(document).ready(function(){
         $('#edit-bynder-search .normal_facet_list > .facet_title').click(function() {
+            var $filters = $(this).siblings();
+            $filters.find('.expand i.fa-angle-up')
+                .addClass('fa-angle-down')
+                .removeClass('fa-angle-up');
+            $filters.find('.item-list:visible').slideUp(300);
+
             $(this).find('.expand i').toggleClass('fa-angle-down').toggleClass('fa-angle-up');
             $(this).find(' > .item-list').slideToggle(300);
         });
@@ -107,20 +113,20 @@
             var exists = ($.grep(current_filters.filters, function(e, i){
                 return e.key == filter_key;
             }).length);
-            if(!exists){
-                //Add current filter from list
-                current_filters.filters.push({
-                    key: filter_key,
-                    value: filter_value,
-                });
-                link.addClass('active');
-            }else{
-                //Remove current filter from list
+            if (exists) {
+                 //Remove current filter from list
                 current_filters.filters = $.grep(current_filters.filters, function(e, i){
                     return e.key != filter_key;
                 });
                 link.removeClass('active');
             }
+
+            // Add current filter to list
+            current_filters.filters.push({
+                key: filter_key,
+                value: filter_value,
+            });
+            link.addClass('active');
 
             filters_input.val(JSON.stringify(current_filters));
             $('#media-bynder-add').submit();

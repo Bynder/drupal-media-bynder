@@ -130,8 +130,8 @@ function media_bynder_generate_search($state) {
     $data['search'] = array(
       '#type' => 'fieldset',
       '#title' => t('Search'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
       '#attributes' => array(
         'class' => array(
           'bynder-search-form',
@@ -196,8 +196,8 @@ function media_bynder_parameter($container, $key, $default = NULL) {
 function media_bynder_search_string($state) {
     $search = NULL;
 
-    if (isset($state['values']['search'])) {
-        $search = $state['values']['search'];
+    if (isset($state['values']['field'])) {
+        $search = $state['values']['field'];
     } elseif (isset($_GET['search'])) {
         $search = check_plain(filter_xss($_GET['search']));
     }
@@ -302,6 +302,7 @@ function media_bynder_parse_selected_facets($selected_facets) {
 
 function media_bynder_generate_selected_facets($selected_facets) {
     global $filter_labels;
+    $brands = media_bynder_brands();
     if (empty($selected_facets)) {
         return array();
     }
@@ -314,14 +315,23 @@ function media_bynder_generate_selected_facets($selected_facets) {
             'class' => 'selected_facet_list facet_list'
         )
     );
+
     foreach ($selected_facets as $selected_facet) {
         $selected_facet_key = $selected_facet->key;
+        $selected_facet_value = $selected_facet->value;
+
+        if($selected_facet_key == 'brandId') {
+            $facet_name = media_bynder_get_brand_name($brands, $selected_facet_value);
+        } else {
+            $facet_name = $selected_facet_value;
+        }
+
         if(!isset($filter_labels[$selected_facet_key])){
             $filter_labels[$selected_facet_key] = t($selected_facet_key);
         }
 
         $facet_category = array(
-            'data' => "<span>" . filter_xss($filter_labels[$selected_facet_key]) . "<span class='expand'><i class='fa fa-times'></i></span></span>",
+            'data' => "<span>" . filter_xss($facet_name) . "<span class='expand'><i class='fa fa-times'></i></span></span>",
             'class' => array(
                 'facet_title'
             ),
@@ -402,6 +412,7 @@ function media_bynder_generate_facets_link($facet_category, $facet_category_name
         } else {
             $facet_name = $facet_id;
         }
+
         if (!isset($filter_labels[$facet_name])) {
             $filter_labels[$facet_name] = $facet_name;
         }

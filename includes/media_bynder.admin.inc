@@ -196,8 +196,8 @@ function media_bynder_parameter($container, $key, $default = NULL) {
 function media_bynder_search_string($state) {
     $search = NULL;
 
-    if (isset($state['values']['search'])) {
-        $search = $state['values']['search'];
+    if (isset($state['values']['field'])) {
+        $search = $state['values']['field'];
     } elseif (isset($_GET['search'])) {
         $search = check_plain(filter_xss($_GET['search']));
     }

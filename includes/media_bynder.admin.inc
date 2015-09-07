@@ -73,6 +73,7 @@ function media_bynder_save_image($id, $idHash){
     }
     $file->filesize = 0;
     $file->filename = $arr_json['name'];
+    $file->uri = $arr_json['thumbnails']['thul'];
 
     if ($file === FALSE) {
         return array('success' => 0, 'message' => 'An error occurred and no file was added to your Library.');

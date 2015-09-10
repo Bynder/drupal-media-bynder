@@ -65,7 +65,7 @@ function media_bynder_save_image($id, $idHash){
         return array('success' => 0, 'message' => $rest_client->error);
     }
 
-    $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
+    $uri = file_stream_wrapper_uri_normalize($arr_json['thumbnails']['thul']);
     $file = file_uri_to_object($uri, TRUE);
 
     if ($arr_json['type'] == 'image') {
@@ -73,7 +73,6 @@ function media_bynder_save_image($id, $idHash){
     }
     $file->filesize = 0;
     $file->filename = $arr_json['name'];
-    $file->uri = $arr_json['thumbnails']['thul'];
 
     if ($file === FALSE) {
         return array('success' => 0, 'message' => 'An error occurred and no file was added to your Library.');

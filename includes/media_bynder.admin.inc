@@ -557,14 +557,13 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);
-    }
-    if (isset($arr_json['count']['total'])) {
-        $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
+        if (isset($arr_json['count']['total'])) {
+            $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
+        }
     } else {
         drupal_set_message(t('Could not retrieve search results:') . filter_xss($rest_client->error), 'error');
         return false;
-     }
-
+    }
     return $arr_json;
 }
 

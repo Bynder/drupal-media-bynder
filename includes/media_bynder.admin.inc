@@ -550,19 +550,13 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);
-
-        //Set total count;
-        if(isset($arr_json['count']['brandId'])){
-            $total_count = 0;
-            foreach($arr_json['count']['brandId'] as $brand_count){
-                $total_count += $brand_count;
-            }
-            $arr_json['totalNrOfResults'] = $total_count;
-        }
+    }
+    if (isset($arr_json['count']['total'])) {
+        $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
     } else {
         drupal_set_message(t('Could not retrieve search results:') . filter_xss($rest_client->error), 'error');
         return false;
-    }
+     }
 
     return $arr_json;
 }

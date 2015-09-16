@@ -94,6 +94,7 @@ form#media-bynder-add {
 
 #edit-bynder-search .item-list {
     clear:both;
+    padding: 10px 0 0 0;
 }
 
 #edit-bynder-search .item-list:before,
@@ -381,3 +382,9 @@ body.page-media-browser {
 .media-modal-frame {
     height: 800px!important;
 }
+
+#edit-search {
+    border: none;
+    padding: 0;
+}
+

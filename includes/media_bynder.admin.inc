@@ -17,8 +17,10 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
 
     $rest_client = media_bynder_rest_client();
     $all_results = $rest_client->getFacets('');
-    $all_media = json_decode($all_results, TRUE);
-    variable_set('all_media', $all_media);
+    if(is_string($all_results)) {
+          $all_media = json_decode($all_results, TRUE);
+          variable_set('all_media', $all_media);
+    }    
 
     $form['#attached']['library'][] = array('media_bynder', 'media_bynder_administration');
 

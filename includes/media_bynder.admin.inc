@@ -41,7 +41,7 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
         $asset_data = media_bynder_uri_parse_url($selected_asset);
         $id = $asset_data['i'];
         $idHash = $asset_data['f'];
-        $result = media_bynder_save_image($id, $idHash);
+        $result = media_bynder_save_image($id, $idHash, $form);
         if(!$result['success']){
             drupal_set_message(t($result['message']), 'error');
         }else{
@@ -55,7 +55,7 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     return array('bynder' => $data);
 }
 
-function media_bynder_save_image($id, $idHash){
+function media_bynder_save_image($id, $idHash, $form = null){
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->getMediaObject($id);
 
@@ -657,7 +657,7 @@ function media_bynder_submit_mob(&$form, &$form_state) {
 
     $redirect = 'media_bynder_add';
 
-    $result = media_bynder_save_image($id, $idHash);
+    $result = media_bynder_save_image($id, $idHash, $form);
     if(!$result['success']){
         echo '{"success": 0, "type": "error", "message": "' . $result['message'] . '"}';
     }else{

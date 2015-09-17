@@ -14,7 +14,9 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
         foreach ($parts as $part => $part_key) {
             if ($part_key == 'i'){
                 //idHash of URI
-                return media_bynder_embed_url($parts[$part + 1]);
+                if (count($parts) >= ($part +1)) {
+                   return media_bynder_embed_url($parts[$part + 1]);
+                }
             }
         }
         return FALSE;

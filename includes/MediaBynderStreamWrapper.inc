@@ -9,17 +9,17 @@
 class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
 
     public function interpolateUrl() {
-        $this->base_url = variable_get('media_bynder_url', '');
-
-        if ($parameters = $this->get_parameters()) {
-            return media_bynder_embed_url($parameters['i']);
-        } else {
-            $parameters = media_bynder_uri_parse_style_url($this->uri);
-            if($parameters){
-                return media_bynder_embed_url($parameters['i'], $parameters['style'], $parameters['effects']);
+        $parts = explode('/', $this->uri);
+      
+        foreach ($parts as $part => $part_key) {
+            if ($part_key == 'i'){
+                //idHash of URI
+                if (count($parts) >= ($part + 1)) {
+                   return media_bynder_embed_url($parts[$part + 1]);
+                }
             }
-            return FALSE;
         }
+        return FALSE;
     }
 
     /**

@@ -611,6 +611,10 @@ function media_bynder_generate_result_current($media_item) {
         return FALSE;
     }
 
+    if (!isset($media_item['idHash'])) {
+        return "image has no idHash";
+    }
+
     $variables = array();
     $variables['path'] = $media_item['thumbnails']['thul'];
 

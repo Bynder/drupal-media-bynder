@@ -15,6 +15,14 @@ include_once 'BynderRestClient.inc';
 function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     module_load_include('inc', 'media', 'includes/media.browser');
 
+    $rest_client = media_bynder_rest_client();
+    $all_results = $rest_client->getFacets('');
+
+    if(is_string($all_results)) {
+        $all_media = json_decode($all_results, TRUE);
+        variable_set('all_media', $all_media);
+    }
+
     $form['#attached']['library'][] = array('media_bynder', 'media_bynder_administration');
 
     $form['#attached']['css'][] = array(
@@ -61,6 +69,7 @@ function media_bynder_save_image($id, $idHash){
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);
+        variable_set('current_media', $arr_json);
     } else {
         return array('success' => 0, 'message' => $rest_client->error);
     }

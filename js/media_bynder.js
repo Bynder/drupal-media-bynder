@@ -62,37 +62,6 @@
         }
     };
 
-    var UpdateQueryString = function(key, value, url) {
-        if (!url){
-            url = window.location.href;
-        }
-        var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"), hash;
-        if (re.test(url)){
-            if (typeof value !== 'undefined' && value !== null){
-            return url.replace(re, '$1' + key + "=" + value + '$2$3');
-            } else {
-                hash = url.split('#');
-                url = hash[0].replace(re, '$1$3').replace(/(&|\?)$/, '');
-                if (typeof hash[1] !== 'undefined' && hash[1] !== null){
-                    url += '#' + hash[1];
-                }
-                return url;
-            }
-    } else {
-        if (typeof value !== 'undefined' && value !== null) {
-            var separator = url.indexOf('?') !== -1 ? '&' : '?';
-            hash = url.split('#');
-            url = hash[0] + separator + key + '=' + value;
-            if (typeof hash[1] !== 'undefined' && hash[1] !== null) {
-                url += '#' + hash[1];
-            }
-            return url;
-        } else {
-            return url;
-        }
-    }
-};
-
     $(document).ready(function(){
         $('#edit-bynder-search .normal_facet_list > .facet_title').click(function() {
             var $filters = $(this).siblings();
@@ -133,7 +102,7 @@
 
             //go back to the first page
             var old_form_action = $('#media-bynder-add').attr('action');
-            var new_form_action = UpdateQueryString('page', '0', old_form_action);
+            var new_form_action = old_form_action.replace(/(page=)[^\&]+/, '$1' + '0');
             $('#media-bynder-add').attr('action', new_form_action);
 
             var link = $(e.currentTarget);

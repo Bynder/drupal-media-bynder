@@ -221,7 +221,14 @@ function media_bynder_filters_json($state) {
 
     if (isset($state['values']['filters'])) {
         $filters_json = json_decode($state['values']['filters']);
-        if($filters_json){
+        variable_set('bynder_filters', $filters_json);
+    } else {
+        if (variable_get('bynder_filters', FALSE)) {
+           $filters_json = variable_get('bynder_filters');
+       }
+    }
+    if (isset($filters_json)) {
+        if (isset($filters_json->filters)) {
             $filters = $filters_json->filters;
         }
     }

@@ -88,7 +88,7 @@ class BynderRestClient {
             return FALSE;
         } elseif ($http_code != 200) {
             $this->error = $response;
-            return FALSE;
+            return $http_code;
         } else {
             return $response;
         }
@@ -112,6 +112,36 @@ class BynderRestClient {
         $url = $this->baseRestUrl . '/brands/';
         $this->options[CURLOPT_URL] = $url;
         return $this->execute();
+    }
+
+      public function customResolutionUrl($file, $width, $height) {
+        if(isset($file['thumbnails']) && isset($file['idHash'])) {
+            $thumbnails = $file['thumbnails'];
+            $idHash  = $file['idHash'];
+        } else {
+            return FALSE;
+        }
+
+        foreach ($thumbnails as $prefix => $thumbnail_url) {
+            $retries = 5;
+            $url = variable_get('media_bynder_url', '') . '/additional/';
+            $url .= $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
+            $this->options[CURLOPT_URL] = $url;
+            $result = $this->execute();
+
+            if ($result == 202) {
+                while($retries > 0 && $result == 202) {
+                    $result = $this->execute();
+                    $retries--;
+                    sleep(2);
+                }
+            } else if (!is_numeric($result) || $result == 302) {
+                return $url;
+            } else {
+                $this->error = 'statuscode $result: for prefix $prefix.';
+            }
+        }
+    return FALSE;
     }
 
     public function getMediaObject($id) {

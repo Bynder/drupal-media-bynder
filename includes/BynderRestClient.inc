@@ -115,6 +115,7 @@ class BynderRestClient {
     }
 
       public function customResolutionUrl($file, $width, $height) {
+        $retries = 5;
         if(isset($file['thumbnails']) && isset($file['idHash'])) {
             $thumbnails = $file['thumbnails'];
             $idHash  = $file['idHash'];
@@ -123,7 +124,6 @@ class BynderRestClient {
         }
 
         foreach ($thumbnails as $prefix => $thumbnail_url) {
-            $retries = 5;
             $url = variable_get('media_bynder_url', '') . '/additional/';
             $url .= $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
             $this->options[CURLOPT_URL] = $url;

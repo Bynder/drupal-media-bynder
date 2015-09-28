@@ -11,10 +11,10 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
     public function interpolateUrl() {
         $parts = explode('/', $this->uri);
 
-        foreach ($parts as $part => $part_key) {
+        foreach ($parts as $part_key => $part) {
             if ($part_key == 'i'){
-                if (count($parts) >= ($part + 1)) {
-                    return media_bynder_embed_url($parts[$part + 1]);
+                if (count($parts) >= ($part_key + 1)) {
+                    return media_bynder_embed_url($parts[$part_key + 1]);
                 }
             }
         }

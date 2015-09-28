@@ -63,6 +63,29 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     return array('bynder' => $data);
 }
 
+function media_bynder_media_item_detailed($media_item){
+    $detailed_media_item = array();
+
+    if (isset($media_item['thumbnails'])) {
+        foreach ($media_item['thumbnails'] as $media_item_url_key => $media_item_url) {
+            $media_size = getimagesize($media_item_url);
+            $media_width = $media_size[0];
+            $media_height = $media_size[1];
+            $media_filesize = array_change_key_case(get_headers($media_item_url, TRUE))['content-length'];
+
+            $detailed_media_item = [
+                'width' => $media_width,
+                'height' => $media_height,
+                'filesize' => $media_filesize,
+                'url' => $media_item_url
+            ];
+
+            $media_item['details'][$media_item_url_key] = $detailed_media_item;
+        }
+    }
+    return $media_item;
+}
+
 function media_bynder_save_image($id, $idHash, $form = null){
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->getMediaObject($id);

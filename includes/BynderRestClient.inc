@@ -114,7 +114,7 @@ class BynderRestClient {
         return $this->execute();
     }
 
-      public function customResolutionUrl($file, $width, $height) {
+    public function customResolutionUrl($file, $width, $height) {
         $retries = 5;
         if(isset($file['thumbnails']) && isset($file['idHash'])) {
             $thumbnails = $file['thumbnails'];
@@ -141,7 +141,7 @@ class BynderRestClient {
                 $this->error = 'statuscode $result: for prefix $prefix.';
             }
         }
-    return FALSE;
+        return FALSE;
     }
 
     public function getMediaObject($id) {

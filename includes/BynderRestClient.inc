@@ -114,13 +114,18 @@ class BynderRestClient {
         return $this->execute();
     }
 
-    public function customResolutionUrl($file, $width, $height) {
+    public function customResolutionUrl($file, $width, $height, $prefix=FALSE) {
         $retries = 5;
         if(isset($file['thumbnails']) && isset($file['idHash'])) {
             $thumbnails = $file['thumbnails'];
             $idHash  = $file['idHash'];
         } else {
             return FALSE;
+        }
+
+        if ($prefix) {
+            $url = variable_get('media_bynder_url', '') . '/additional/';
+            return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
         }
 
         foreach ($thumbnails as $prefix => $thumbnail_url) {
@@ -155,6 +160,14 @@ class BynderRestClient {
         $result = json_decode($result);
 
         return $result->count;
+    }
+
+    public function getAll() {
+        $this->options[CURLOPT_URL] = $this->baseRestUrl . '/media/?count=1';
+        $result = $this->execute();
+        $result = json_decode($result, TRUE);
+
+        return $result;
     }
 
     public function getMetaProperties() {

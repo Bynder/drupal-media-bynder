@@ -19,6 +19,66 @@ function media_bynder_rest_client() {
 }
 
 /**
+* @param array $media_item an array with with the complete selected image data
+* @return the same array with an extra array call 'details', which contains width, heigth, filesize and the url if available. Also builds an url for the original public url, stored in '-'.
+**/
+
+function media_bynder_media_item_detailed($media_item){
+    $detailed_media_item = array();
+
+    if (isset($media_item['thumbnails'])) {
+        foreach ($media_item['thumbnails'] as $media_item_prefix => $media_item_url) {
+           try {
+                $media_size = @getimagesize($media_item_url);
+           } catch (Exception $e){
+                $media_size = [0, 0];
+           }
+
+            $media_width = $media_size[0];
+            $media_height = $media_size[1];
+
+            if (isset(array_change_key_case(get_headers($media_item_url, TRUE))['content-length'])) {
+                $media_filesize = array_change_key_case(get_headers($media_item_url, TRUE))['content-length'];
+            } else {
+                $media_filesize = 0;
+            }
+
+            $detailed_media_item = [
+                'width' => $media_width,
+                'height' => $media_height,
+                'filesize' => $media_filesize,
+                'url' => $media_item_url
+            ];
+            $media_item['details'][$media_item_prefix] = $detailed_media_item;
+        }
+    }
+    return $media_item;
+}
+
+function media_bynder_get_object_by_hash($idHash) {
+    $all_media = variable_get('all_media');
+    if (!isset($all_media)) {
+          $all_media = array();
+    }
+
+    foreach ($all_media as $media_key => $media_value) {
+        if ($all_media[$media_key]['idHash'] == $idHash) {
+            return $media_value;
+        }
+    }
+    return FALSE;
+}
+
+function media_bynder_get_object_by_id($id) {
+    $rest_client = media_bynder_rest_client();
+    $result = $rest_client->getMediaObject($id);
+    if (!is_numeric($result)) {
+       return json_decode($result, TRUE);
+    }
+    return FALSE;
+}
+
+/**
  * Create the embed url for a fragment.
  *
  * @param string $fragment_id idHash of entity.
@@ -26,15 +86,30 @@ function media_bynder_rest_client() {
  * @param array $type effect
  * @todo add support for type and effect
  */
-function media_bynder_embed_url($fragment_id, $type=false, $effects=false, $name = null){
-    $current_media = variable_get('current_media');
-
-    if(isset($current_media)) {
-        if ($current_media['idHash'] == $fragment_id) {
-            return $current_media['thumbnails']['thul'];
-        }
+function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $media_item=FALSE, $fragment_idHash=FALSE){
+    $url = '';
+     if(!$type){
+        $type = "thul";
     }
-     return FALSE;
+    if (!$media_item) {
+            if (isset($fragment_id)) {
+                $media_item = media_bynder_get_object_by_id($fragment_id);
+            } else {
+                if ($fragment_idHash) {
+                    $media_item = media_bynder_get_object_by_hash($fragment_idHash);
+                }
+            }
+    }
+
+    if($effects){
+        $rest_client = media_bynder_rest_client();
+        $url = $rest_client->customResolutionUrl($media_item, $effect['width'], $effect['height']);
+    } else if (isset($media_item['thumbnails'][$type])) {
+        $url = $media_item['thumbnails'][$type];
+    } else {
+        return FALSE;
+    }
+    return $url;
 }
 
 /**
@@ -53,26 +128,32 @@ function media_bynder_uri_parse_style_url($uri) {
     }
 }
 
-
 /**
  * Parse the uri.
  */
-function media_bynder_uri_parse_url($uri) {
-    if(!validateBynderDrupalUrl($uri)){
-        return FALSE;
+function media_bynder_idHash_from_uri($uri) {
+    $parts = explode('/', $uri);
+    foreach ($parts as $part_key => $part) {
+        if ($part == 'i'){
+            if (count($parts) >= ($part_key + 1)) {
+                return $parts[$part_key + 1];
+            }
+        }
     }
-    $target = file_uri_target($uri);
-    $parts = explode('/', $target);
-    if(isset($parts[1]) && isset($parts[3])) {
-        return array(
-            "f" => $parts[3],
-            "i" => $parts[1]
-        );
-    }else{
-        return FALSE;
-    }
+    return FALSE;
 }
 
+function media_bynder_id_from_uri($uri) {
+    $parts = explode('/', $uri);
+    foreach ($parts as $part_key => $part) {
+        if ($part == 'f'){
+            if (count($parts) >= ($part_key + 1)) {
+                return $parts[$part_key + 1];
+            }
+        }
+    }
+    return FALSE;
+}
 
 function isValid($type, $val){
     switch($type){
@@ -84,7 +165,7 @@ function isValid($type, $val){
             return preg_match("/bynder:\/\/f\/[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}\/i\/[a-f0-9]{16}/", $val);
     }
     return true;
-};
+}
 
 function validateUUID($str){
     if (isValid("uuid", $str)) {
@@ -93,7 +174,7 @@ function validateUUID($str){
         error_log("Invalid UUID: " . $str);
         return FALSE;
     }
-};
+}
 
 function validateIdHash($str){
     if (isValid('idHash', $str)) {
@@ -102,7 +183,7 @@ function validateIdHash($str){
         error_log("Invalid IDHash: " . $str);
         return FALSE;
     }
-};
+}
 
 function validateBynderDrupalUrl($str){
     if (isValid('bynder_drupal_url', $str)) {
@@ -111,4 +192,4 @@ function validateBynderDrupalUrl($str){
         error_log("Invalid Bynder Drupal URL: " . $str );
         return FALSE;
     }
-};
+}

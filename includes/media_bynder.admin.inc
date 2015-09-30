@@ -15,14 +15,6 @@ include_once 'BynderRestClient.inc';
 function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     module_load_include('inc', 'media', 'includes/media.browser');
 
-    $rest_client = media_bynder_rest_client();
-    $all_results = $rest_client->getFacets('');
-
-    if(is_string($all_results)) {
-        $all_media = json_decode($all_results, TRUE);
-        variable_set('all_media', $all_media);
-    }
-
     $form['#attached']['library'][] = array('media_bynder', 'media_bynder_administration');
 
     $form['#attached']['css'][] = array(
@@ -46,10 +38,8 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
 
     $selected_asset = media_bynder_parameter($_POST, 'selected_asset');
     if ($selected_asset) {
-        $asset_data = media_bynder_uri_parse_url($selected_asset);
-        $id = $asset_data['i'];
-        $idHash = $asset_data['f'];
-        $result = media_bynder_save_image($id, $idHash, $form);
+        $id = media_bynder_id_from_uri($selected_asset);
+        $result = media_bynder_save_image($id, $form);
         if(!$result['success']){
             drupal_set_message(t($result['message']), 'error');
         }else{
@@ -59,52 +49,24 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
             )));
         }
     }
-
     return array('bynder' => $data);
 }
 
-function media_bynder_media_item_detailed($media_item){
-    $detailed_media_item = array();
-
-    if (isset($media_item['thumbnails'])) {
-        foreach ($media_item['thumbnails'] as $media_item_url_key => $media_item_url) {
-            $media_size = getimagesize($media_item_url);
-            $media_width = $media_size[0];
-            $media_height = $media_size[1];
-            $media_filesize = array_change_key_case(get_headers($media_item_url, TRUE))['content-length'];
-
-            $detailed_media_item = [
-                'width' => $media_width,
-                'height' => $media_height,
-                'filesize' => $media_filesize,
-                'url' => $media_item_url
-            ];
-
-            $media_item['details'][$media_item_url_key] = $detailed_media_item;
-        }
-    }
-    return $media_item;
-}
-
-function media_bynder_save_image($id, $idHash, $form = null){
-    $rest_client = media_bynder_rest_client();
-    $result = $rest_client->getMediaObject($id);
-
-    if ($result) {
-        $arr_json = json_decode($result, TRUE);
-        variable_set('current_media', $arr_json);
-    } else {
-        return array('success' => 0, 'message' => $rest_client->error);
-    }
-
+function media_bynder_save_image($id, $form = null){
+    $selected_media = media_bynder_get_object_by_id($id);
+    variable_set('current_media', $selected_media);
+    $idHash = $selected_media['idHash'];
+   
     $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
     $file = file_uri_to_object($uri, TRUE);
 
-    if ($arr_json['type'] == 'image') {
+    $detailed_media = media_bynder_media_item_detailed($selected_media);
+
+    if ($detailed_media['type'] == 'image') {
         $file->filemime = 'image/jpeg';
     }
-    $file->filesize = 0;
-    $file->filename = $arr_json['name'];
+    $file->filesize = $detailed_media['filesize'];
+    $file->filename = $detailed_media['name'];
 
     if ($file === FALSE) {
         return array('success' => 0, 'message' => 'An error occurred and no file was added to your Library.');
@@ -130,6 +92,11 @@ function media_bynder_save_image($id, $idHash, $form = null){
 function media_bynder_generate_search($state) {
     global $filter_labels;
     global $meta_property_prefix;
+
+    $rest_client = media_bynder_rest_client();
+    $all_media = $rest_client->getAll();
+    variable_set('all_media', $all_media['media']);
+
     $meta_property_prefix = 'property_';
 
     $data = array('#type' => 'fieldset');

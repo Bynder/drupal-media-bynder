@@ -9,27 +9,8 @@
 class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
 
     public function interpolateUrl() {
-        $parts = explode('/', $this->uri);
-
-        foreach ($parts as $part_key => $part) {
-            if ($part_key == 'i'){
-                if (count($parts) >= ($part_key + 1)) {
-                    return media_bynder_embed_url($parts[$part_key + 1]);
-                }
-            }
-        }
-        return FALSE;
-    }
-
-    /**
-     * Function getOriginalThumbnailPath().
-     * @return string
-     *   The path to the thumbnail.
-     */
-    public function getOriginalThumbnailPath() {
-        $parts = $this->get_parameters();
-        $url = media_bynder_embed_url($parts['i'], 'thul');
-        return $url;
+      $id = media_bynder_id_from_uri($this->uri);
+      return media_bynder_embed_url($id);
     }
 
     /**
@@ -38,9 +19,7 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
      *   The path to the thumbnail.
      */
     public function getWebimagePath() {
-        $parts = $this->get_parameters();
-        $url = media_bynder_embed_url($parts['i'], 'web');
-        return $url;
+        $id = media_bynder_id_from_uri($this->uri);
+        return media_bynder_embed_url($id);
     }
-
 }

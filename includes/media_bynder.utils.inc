@@ -56,24 +56,22 @@ function media_bynder_media_item_detailed($media_item){
 }
 
 function media_bynder_get_object_by_hash($idHash) {
-    $all_media = variable_get('all_media');
-    if (!isset($all_media)) {
-          $all_media = array();
-    }
-
-    foreach ($all_media as $media_key => $media_value) {
-        if ($all_media[$media_key]['idHash'] == $idHash) {
-            return $media_value;
+    $current_results = variable_get('search_result')['media'];
+    foreach ($current_results as $current_result) {
+        if ($current_result['idHash'] == $id) {
+            return $current_result;
         }
     }
     return FALSE;
 }
 
 function media_bynder_get_object_by_id($id) {
-    $rest_client = media_bynder_rest_client();
-    $result = $rest_client->getMediaObject($id);
-    if (!is_numeric($result)) {
-       return json_decode($result, TRUE);
+    $current_results = variable_get('search_result')['media'];
+
+    foreach ($current_results as $current_result) {
+        if ($current_result['id'] == $id) {
+            return $current_result;
+        }
     }
     return FALSE;
 }

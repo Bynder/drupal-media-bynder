@@ -54,19 +54,16 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
 
 function media_bynder_save_image($id, $form = null){
     $selected_media = media_bynder_get_object_by_id($id);
-    variable_set('current_media', $selected_media);
     $idHash = $selected_media['idHash'];
-   
+
     $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
     $file = file_uri_to_object($uri, TRUE);
 
-    $detailed_media = media_bynder_media_item_detailed($selected_media);
-
-    if ($detailed_media['type'] == 'image') {
+    if ($selected_media['type'] == 'image') {
         $file->filemime = 'image/jpeg';
     }
-    $file->filesize = $detailed_media['filesize'];
-    $file->filename = $detailed_media['name'];
+    $file->filesize = 0;//$detailed_media['filesize'];
+    $file->filename = $selected_media['name'];
 
     if ($file === FALSE) {
         return array('success' => 0, 'message' => 'An error occurred and no file was added to your Library.');
@@ -92,10 +89,6 @@ function media_bynder_save_image($id, $form = null){
 function media_bynder_generate_search($state) {
     global $filter_labels;
     global $meta_property_prefix;
-
-    $rest_client = media_bynder_rest_client();
-    $all_media = $rest_client->getAll();
-    variable_set('all_media', $all_media['media']);
 
     $meta_property_prefix = 'property_';
 
@@ -556,6 +549,7 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);
+        variable_set('search_result', $arr_json);
         if (isset($arr_json['count']['total'])) {
             $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
         }

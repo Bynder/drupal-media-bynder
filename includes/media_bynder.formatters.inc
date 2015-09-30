@@ -70,18 +70,18 @@ function media_bynder_file_formatter_image_settings($form, &$form_state, $settin
 /**
  * Implements hook_entity_info_alter().
  */
-function media_bynder_entity_info_alter(&$entity_info) {
-  cache_clear_all();
-  $current_media = variable_get('current_media');
-  $custom_view_modes = $current_media['thumbnails'];
-  $entity_info['file']['view modes'] = array();
+// function media_bynder_entity_info_alter(&$entity_info) {
+//   cache_clear_all();
+//   $current_media = variable_get('current_media');
+//   $custom_view_modes = $current_media['thumbnails'];
+//   $entity_info['file']['view modes'] = array();
 
-  foreach ($custom_view_modes as $custom_view_key => $custom_view_key) {
-    $entity_info['file']['view modes'] += array(
-      $custom_view_key => array(
-        'label' => t($custom_view_key),
-        'custom settings' => TRUE,
-      ),
-    );
-  }
-}
+//   foreach ($custom_view_modes as $custom_view_key => $custom_view_key) {
+//     $entity_info['file']['view modes'] += array(
+//       $custom_view_key => array(
+//         'label' => t($custom_view_key),
+//         'custom settings' => TRUE,
+//       ),
+//     );
+//   }
+// }

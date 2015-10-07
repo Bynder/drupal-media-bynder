@@ -9,7 +9,7 @@
 class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
 
     public function interpolateUrl() {
-      return media_bynder_embed_url($this->parameters['f']);
+        return @media_bynder_embed_url($this->parameters['f']);
     }
 
     /**
@@ -18,6 +18,6 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
      *   The path to the thumbnail.
      */
     public function getWebimagePath() {
-        return media_bynder_embed_url($this->parameters['f']);
+        return @media_bynder_embed_url($this->parameters['f']);
     }
 }

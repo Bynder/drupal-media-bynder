@@ -546,10 +546,11 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
     }
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->search($query, $start_index, $nr_of_results);
+    $all_results = $rest_client->getAll();
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);
-        variable_set('search_result', $arr_json);
+        variable_set('search_result', $all_results);
         if (isset($arr_json['count']['total'])) {
             $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
         }

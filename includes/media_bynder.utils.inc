@@ -101,7 +101,7 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $medi
 
     if($effects){
         $rest_client = media_bynder_rest_client();
-        $url = $rest_client->customResolutionUrl($media_item, $effect['width'], $effect['height']);
+        $url = $rest_client->customResolutionUrl($media_item, $effects['width'], $effects['height']);
     } else if (isset($media_item['thumbnails'][$type])) {
         $url = $media_item['thumbnails'][$type];
     } else {

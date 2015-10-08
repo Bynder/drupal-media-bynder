@@ -100,10 +100,14 @@
         $('#edit-bynder-search .filter-url').click(function(e) {
             e.preventDefault();
 
+            //go back to the first page
+            var old_form_action = $('#media-bynder-add').attr('action');
+            var new_form_action = old_form_action.replace(/(page=)[^\&]+/, '$1' + '0');
+            $('#media-bynder-add').attr('action', new_form_action);
+
             var link = $(e.currentTarget);
             var filter_key = link.data('filter-key');
             var filter_value = link.data('filter-value');
-            // var active = link.hasClass('active');
 
             var filters_input = $('#edit-bynder-search input[name="filters"]');
 

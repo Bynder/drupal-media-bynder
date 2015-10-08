@@ -228,7 +228,7 @@ function media_bynder_filters_json($state) {
        }
     }
     if (isset($filters_json)) {
-        if (isset($filters_json->filters)) {
+        if (isset($filters_json) && isset($filters_json->filters)) {
             $filters = $filters_json->filters;
         }
     }

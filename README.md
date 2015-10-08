@@ -61,17 +61,17 @@ You can use this function to (always) add an image to a certain content type. A 
 
 Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.
 
-1) Add a Style in Home » Administration » Configuration » Media.
-2) Add the 'Bynder custom resolution' effect and select a width and height smaller than the source image as it does not support upscaling. Make sure this is the only effect applied.
-3) Go to Home » Administration » Structure » Content types. Click 'manage fields' for the content type of your choice.
-4) Add a new field. Make sure 'field type' is set to 'Image' and 'widget' to 'media browser'.
-5) Click 'Save'. On the next page click 'Save field settings' again.
-6) Change 'Enabled browser plugins' to Bynder' only.
-7) Change 'Allowed URI schemes' to 'Bynder media' only.
-8) Click 'Save settings' once again.
-9) Go to Home » Administration » Structure » Content types.  Click 'manage display' for the content type you choose in step 3.
-10) For your field (named in step 4) press the 'gear icon'.
-11) Change the 'Image style' to your image style, which you created in step step 1 & 2. If you look at the upper right corner, you will see you just edited this for the 'Default' view mode. You will need to repeat this step for the 'Full content' view mode as well.
-12) Now you can add new content. Go to Home » Add content. Add here new content of the type specified in step step 3.
-13) Scroll down and select an image by clicking the 'Browse' button under your added field name.
+1) Add a Style in Home » Administration » Configuration » Media.<br>
+2) Add the 'Bynder custom resolution' effect and select a width and height smaller than the source image as it does not support upscaling. Make sure this is the only effect applied.<br>
+3) Go to Home » Administration » Structure » Content types. Click 'manage fields' for the content type of your choice.<br>
+4) Add a new field. Make sure 'field type' is set to 'Image' and 'widget' to 'media browser'.<br>
+5) Click 'Save'. On the next page click 'Save field settings' again.<br>
+6) Change 'Enabled browser plugins' to Bynder' only.<br>
+7) Change 'Allowed URI schemes' to 'Bynder media' only.<br>
+8) Click 'Save settings' once again.<br>
+9) Go to Home » Administration » Structure » Content types.  Click 'manage display' for the content type you choose in step 3.<br>
+10) For your field (named in step 4) press the 'gear icon'.<br>
+11) Change the 'Image style' to your image style, which you created in step step 1 & 2. If you look at the upper right corner, you will see you just edited this for the 'Default' view mode. You will need to repeat this step for the 'Full content' view mode as well.<br>
+12) Now you can add new content. Go to Home » Add content. Add here new content of the type specified in step step 3.<br>
+13) Scroll down and select an image by clicking the 'Browse' button under your added field name.<br>
 14) Now there should be an image provided by Bynder, with the size specified in step 2, on the content page.

@@ -70,6 +70,7 @@ Creates a call to the public Bynder function in /additional/, make sure this is 
 	<li>Change 'Allowed URI schemes' to 'Bynder media' only.</li>
 	<li>lick 'Save settings' once again.</li>
 	<li>Go to Home » Administration » Structure » Content types.  Click 'manage display' for the content type you choose in step 3.</li>
+	<li>Set format from '<Hidden>' to 'Image'.</li>
 	<li>For your field (named in step 4) press the 'gear icon'.</li>
 	<li>Change the 'Image style' to your image style, which you created in step step 1 & 2. If you look at the upper right corner, you will see you just edited this for the 'Default' view mode. You will need to repeat this step for the 'Full content' view mode as well.</li>
 	<li>Now you can add new content. Go to Home » Add content. Add here new content of the type specified in step step 3.</li>

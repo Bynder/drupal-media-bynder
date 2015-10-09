@@ -94,6 +94,10 @@
             }
             filters_input.val(JSON.stringify(current_filters));
             link.parent().fadeOut(300, function() { $(this).remove(); });
+
+            var input = $('<input>', {type: 'hidden', name: 'source_filter', value: $(this).attr('data-filter-key')});
+            $('#media-bynder-add').append($(input));
+
             $('#media-bynder-add').submit();
         });
 

@@ -131,6 +131,16 @@ function media_bynder_generate_search($state) {
     $search = media_bynder_search_string($state);
     $filters = media_bynder_filters_json($state);
 
+    if (isset($_POST['filters'])){
+        $filters = json_decode($_POST['filters'])->filters;
+    }
+
+    if(isset($_POST['source_filter'])){
+        if ($_POST['source_filter'] == 'bynder_remove_all_facets_filter_key') {
+            $filters = array();
+        }
+    }
+
     $selected_facets = media_bynder_selected_facets($filters);
     $results = media_bynder_search_results($search, $filters, $meta_properties);
     $available_facets = $results['count'];
@@ -221,12 +231,6 @@ function media_bynder_filters_json($state) {
 
     if (isset($state['values']['filters'])) {
         $filters_json = json_decode($state['values']['filters']);
-        variable_set('bynder_filters', $filters_json);
-    } else {
-        if (variable_get('bynder_filters', FALSE)) {
-           $filters_json = variable_get('bynder_filters');
-       }
-    }
     if (isset($filters_json)) {
         if (isset($filters_json) && isset($filters_json->filters)) {
             $filters = $filters_json->filters;
@@ -353,6 +357,16 @@ function media_bynder_generate_selected_facets($selected_facets) {
         );
         $facets_list['#items'][] = $facet_category;
     }
+
+    $facet_remove_all = array(
+        'data' => "<span style='background:#1ca0de'>" . 'Clear facets' . "<span class='expand'><i class='fa fa-times'></i></span></span>",
+        'class' => array(
+            'facet_title'
+            ),
+        'data-filter-key' => 'bynder_remove_all_facets_filter_key'
+    );
+
+    $facets_list['#items'][] = $facet_remove_all;
 
     return $facets_list;
 }

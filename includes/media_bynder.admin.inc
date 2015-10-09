@@ -18,7 +18,7 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     $rest_client = media_bynder_rest_client();
     $all_results = $rest_client->getFacets('');
 
-    if(is_string($all_results)) {
+    if (is_string($all_results)) {
         $all_media = json_decode($all_results, TRUE);
         variable_set('all_media', $all_media);
     }
@@ -132,10 +132,10 @@ function media_bynder_generate_search($state) {
     $filters = media_bynder_filters_json($state);
 
     if (isset($_POST['filters'])){
-        $filters = json_decode($_POST['filters'])->filters;
+        $filters = json_decode(filter_xss($_POST['filters']))->filters;
     }
 
-    if(isset($_POST['source_filter'])){
+    if (isset($_POST['source_filter'])){
         if ($_POST['source_filter'] == 'bynder_remove_all_facets_filter_key') {
             $filters = array();
         }
@@ -231,10 +231,9 @@ function media_bynder_filters_json($state) {
 
     if (isset($state['values']['filters'])) {
         $filters_json = json_decode($state['values']['filters']);
-    if (isset($filters_json)) {
-        if (isset($filters_json) && isset($filters_json->filters)) {
-            $filters = $filters_json->filters;
-        }
+    }
+    if (isset($filters_json->filters)) {
+        $filters = $filters_json->filters;
     }
     return $filters;
 }

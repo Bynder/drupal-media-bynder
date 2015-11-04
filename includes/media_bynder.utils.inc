@@ -27,27 +27,48 @@ function media_bynder_rest_client() {
  * @todo add support for type and effect
  */
 function media_bynder_embed_url($fragment_id, $type=false, $effects=false, $name = null){
-    $current_media = variable_get('current_media');
+    if(!$type){
+        $type = "web";
+    }
+    $base_url = variable_get('media_bynder_url', '');
+    if (substr($base_url, -1) != '/') {
+        $base_url .= '/';
+    }
+    $base_url .= 'm/' . $fragment_id . '/' . $type . '-drupal.jpg';
+    $query = [];
 
-    if(isset($current_media)) {
-        if ($current_media['idHash'] == $fragment_id) {
-            return $current_media['thumbnails']['thul'];
+    if($effects){
+        foreach($effects as $effect_key => $effect){
+            switch($effect_key){
+                case 'image_resize':
+                    $query['h'] = $effect['height'];
+                    $query['w'] = $effect['width'];
+                    break;
+            }
         }
     }
-     return FALSE;
+    return $base_url . '?' . http_build_query($query);
 }
 
 /**
  * Parse the style out of the uri.
  */
 function media_bynder_uri_parse_style_url($uri) {
-    $fragment_id = media_bynder_uri_parse_url($uri)['i'];
-    $current_media = variable_get('current_media');
-
-    if(isset($current_media)) {
-        if ($current_media['idHash'] == $fragment_id) {
-            return $current_media['thumbnails']['thul'];
+    $target = file_uri_target($uri);
+    $parts = explode('/', $target);
+    if(isset($parts[1]) && isset($parts[4]) && isset($parts[6])){
+        $data = array(
+            "style" => $parts[1],
+            "f" => $parts[4],
+            "i" => $parts[6],
+            "effects" => []
+        );
+        $image_styles = image_styles();
+        $image_style = $image_styles[$data['style']];
+        foreach($image_style['effects'] as $effect){
+            $data['effects'][$effect['name']] = $effect['data'];
         }
+        return $data;
     } else {
         return FALSE;
     }

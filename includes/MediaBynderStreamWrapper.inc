@@ -9,13 +9,14 @@
 class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
 
     public function interpolateUrl() {
-        $parts = explode('/', $this->uri);
+        $this->base_url = variable_get('media_bynder_url', '');
 
-        foreach ($parts as $part => $part_key) {
-            if ($part_key == 'i'){
-                if (count($parts) >= ($part + 1)) {
-                    return media_bynder_embed_url($parts[$part + 1]);
-                }
+        if ($parameters = $this->get_parameters()) {
+           return media_bynder_embed_url($parameters['i']);
+        } else {
+            $parameters = media_bynder_uri_parse_style_url($this->uri);
+            if($parameters){
+                return media_bynder_embed_url($parameters['i'], $parameters['style'], $parameters['effects']);
             }
         }
         return FALSE;

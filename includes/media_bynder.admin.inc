@@ -358,7 +358,7 @@ function media_bynder_generate_selected_facets($selected_facets) {
     }
 
     $facet_remove_all = array(
-        'data' => "<span style='background:#1ca0de'>" . 'Clear facets' . "<span class='expand'><i class='fa fa-times'></i></span></span>",
+        'data' => "<span id='clear-all'>Clear facets<span class='expand'><i class='fa fa-times'></i></span></span>",
         'class' => array(
             'facet_title'
             ),

@@ -27,7 +27,7 @@ function media_bynder_rest_client() {
  * @todo add support for type and effect
  */
 function media_bynder_embed_url($fragment_id, $type=false, $effects=false, $name = null){
-    if(!$type){
+    if (!$type) {
         $type = "web";
     }
     $base_url = variable_get('media_bynder_url', '');

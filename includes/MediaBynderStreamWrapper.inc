@@ -12,11 +12,14 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
         $this->base_url = variable_get('media_bynder_url', '');
 
         if ($parameters = $this->get_parameters()) {
-           return media_bynder_embed_url($parameters['i']);
+            return media_bynder_embed_url($parameters['i']);
         } else {
             $parameters = media_bynder_uri_parse_style_url($this->uri);
-            if($parameters){
-                return media_bynder_embed_url($parameters['i'], $parameters['style'], $parameters['effects']);
+            if ($parameters) {
+                $build_url = media_bynder_embed_url($parameters['i'], $parameters['style'], $parameters['effects']);
+                if (validateBynderDrupalUrl($build_url)) {
+                    return $build_url;
+                }
             }
         }
         return FALSE;

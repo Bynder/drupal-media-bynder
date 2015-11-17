@@ -37,17 +37,19 @@ function media_bynder_embed_url($fragment_id, $type=false, $effects=false, $name
     $base_url .= 'm/' . $fragment_id . '/' . $type . '-drupal.jpg';
     $query = [];
 
-    if($effects){
+    if ($effects){
         foreach($effects as $effect_key => $effect){
-            switch($effect_key){
-                case 'image_resize':
-                    $query['h'] = $effect['height'];
-                    $query['w'] = $effect['width'];
-                    break;
+            if ($effect_key == 'image_resize'){
+                $query['h'] = $effect['height'];
+                $query['w'] = $effect['width'];
             }
         }
     }
-    return $base_url . '?' . http_build_query($query);
+    if (empty($query)) {
+        return $base_url;
+    } else {
+        return $base_url . '?' . http_build_query($query);
+    }
 }
 
 /**

@@ -50,7 +50,7 @@ function media_bynder_embed_url($fragment_id, $type=false, $effects=false, $name
             }
         }
     }
-    if (empty($query)) {
+    if (count($query) == 0) {
         return $base_url;
     } else {
         return $base_url . '?' . http_build_query($query);

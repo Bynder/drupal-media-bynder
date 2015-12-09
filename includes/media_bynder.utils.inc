@@ -57,8 +57,8 @@ function media_bynder_media_item_detailed($media_item){
 
 function media_bynder_get_object_by_hash($idHash) {
      $rest_client = media_bynder_rest_client();
-
     $current_results = $url = $rest_client->getAll()['media'];
+
     foreach ($current_results as $current_result) {
         if ($current_result['idHash'] == $id) {
             return $current_result;
@@ -68,8 +68,7 @@ function media_bynder_get_object_by_hash($idHash) {
 }
 
 function media_bynder_get_object_by_id($id) {
-      $rest_client = media_bynder_rest_client();
-
+    $rest_client = media_bynder_rest_client();
     $current_results = $url = $rest_client->getAll()['media'];
 
     foreach ($current_results as $current_result) {

@@ -56,7 +56,9 @@ function media_bynder_media_item_detailed($media_item){
 }
 
 function media_bynder_get_object_by_hash($idHash) {
-    $current_results = variable_get('search_result')['media'];
+     $rest_client = media_bynder_rest_client();
+
+    $current_results = $url = $rest_client->getAll()['media'];
     foreach ($current_results as $current_result) {
         if ($current_result['idHash'] == $id) {
             return $current_result;
@@ -66,7 +68,9 @@ function media_bynder_get_object_by_hash($idHash) {
 }
 
 function media_bynder_get_object_by_id($id) {
-    $current_results = variable_get('search_result')['media'];
+      $rest_client = media_bynder_rest_client();
+
+    $current_results = $url = $rest_client->getAll()['media'];
 
     foreach ($current_results as $current_result) {
         if ($current_result['id'] == $id) {
@@ -84,6 +88,7 @@ function media_bynder_get_object_by_id($id) {
  * @param array $type effect
  * @todo add support for type and effect
  */
+
 function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $media_item=FALSE, $fragment_idHash=FALSE){
     $url = '';
      if(!$type){
@@ -114,13 +119,25 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $medi
  * Parse the style out of the uri.
  */
 function media_bynder_uri_parse_style_url($uri) {
-    $fragment_id = media_bynder_uri_parse_url($uri)['i'];
-    $current_media = variable_get('current_media');
+    if (validateBynderDrupalUrl($uri) == FALSE) {
+        return FALSE;
+    }
 
-    if(isset($current_media)) {
-        if ($current_media['idHash'] == $fragment_id) {
-            return $current_media['thumbnails']['thul'];
+    $target = file_uri_target($uri);
+    $parts = explode('/', $target);
+    if(isset($parts[1]) && isset($parts[4]) && isset($parts[6])){
+        $data = array(
+            "style" => $parts[1],
+            "f" => $parts[4],
+            "i" => $parts[6],
+            "effects" => []
+        );
+        $image_styles = image_styles();
+        $image_style = $image_styles[$data['style']];
+        foreach($image_style['effects'] as $effect){
+            $data['effects'][$effect['name']] = $effect['data'];
         }
+        return $data;
     } else {
         return FALSE;
     }
@@ -153,7 +170,7 @@ function media_bynder_id_from_uri($uri) {
     return FALSE;
 }
 
-function isValid($type, $val){
+function isValid($type, $val) {
     switch($type){
         case "uuid":
             return preg_match("/^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$/", val);
@@ -161,11 +178,22 @@ function isValid($type, $val){
             return preg_match("/[a-f0-9]{16}/", $val);
         case "bynder_drupal_url":
             return preg_match("/bynder:\/\/f\/[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}\/i\/[a-f0-9]{16}/", $val);
+        case "id":
+            return preg_match("/^[0-9a-f]{16}$/", $val);
     }
     return true;
 }
 
-function validateUUID($str){
+function validateId($str) {
+    if (isValid('id', $str)) {
+        return $str;
+    } else {
+        error_log("Invalid ID: " . $str);
+        return FALSE;
+    }
+};
+
+function validateUUID($str) {
     if (isValid("uuid", $str)) {
         return $str;
     } else {
@@ -174,7 +202,7 @@ function validateUUID($str){
     }
 }
 
-function validateIdHash($str){
+function validateIdHash($str) {
     if (isValid('idHash', $str)) {
         return $str;
     } else {
@@ -183,11 +211,11 @@ function validateIdHash($str){
     }
 }
 
-function validateBynderDrupalUrl($str){
+function validateBynderDrupalUrl($str) {
     if (isValid('bynder_drupal_url', $str)) {
         return $str;
     } else {
-        error_log("Invalid Bynder Drupal URL: " . $str );
+        error_log("Invalid Bynder Drupal URL: " . $str);
         return FALSE;
     }
 }

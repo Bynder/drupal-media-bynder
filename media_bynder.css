@@ -388,3 +388,6 @@ body.page-media-browser {
     padding: 0;
 }
 
+span#clear-all {
+    background-color: #1ca0de!important;
+}

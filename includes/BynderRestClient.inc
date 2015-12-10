@@ -116,7 +116,7 @@ class BynderRestClient {
 
     public function customResolutionUrl($file, $width, $height, $prefix=FALSE) {
         $retries = 5;
-        if(isset($file['thumbnails']) && isset($file['idHash'])) {
+        if (isset($file['thumbnails']) && isset($file['idHash'])) {
             $thumbnails = $file['thumbnails'];
             $idHash  = $file['idHash'];
         } else {
@@ -187,14 +187,14 @@ class BynderRestClient {
             $limited_meta_property['name'] = $meta_property->name;
             $limited_meta_property['zindex'] = $meta_property->zindex;
 
-            foreach($meta_property->options as $option){
+            foreach($meta_property->options as $option) {
                 $limited_meta_property['options'][] = array(
                     "id" => $option->id,
                     "label" => $option->label,
                     "name" => $option->name
                 );
             }
-            if(isset($limited_meta_property['options']) && count($limited_meta_property['options']) > 0) {
+            if (isset($limited_meta_property['options']) && count($limited_meta_property['options']) > 0) {
                 $limited_meta_properties[] = $limited_meta_property;
             }
         }

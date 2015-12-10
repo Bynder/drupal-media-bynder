@@ -143,11 +143,11 @@ function media_bynder_custom_resolution_dimensions(array &$dimensions, array $da
  * Will edit the Path to match the API call if the bynder_custom_resolution effect is present in the active style
  */
 function media_bynder_preprocess_image(&$vars) {
-    if(array_key_exists('uri', $vars)) {
+    if (array_key_exists('uri', $vars)) {
         $vars['path'] = $vars['uri'];
     }
 
-    if(!isset($vars['style_name'])){
+    if (!isset($vars['style_name'])) {
         return FALSE;
     }
 

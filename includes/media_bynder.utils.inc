@@ -23,14 +23,14 @@ function media_bynder_rest_client() {
 * @return the same array with an extra array call 'details', which contains width, heigth, filesize and the url if available. Also builds an url for the original public url, stored in '-'.
 **/
 
-function media_bynder_media_item_detailed($media_item){
+function media_bynder_media_item_detailed($media_item) {
     $detailed_media_item = array();
 
     if (isset($media_item['thumbnails'])) {
         foreach ($media_item['thumbnails'] as $media_item_prefix => $media_item_url) {
            try {
                 $media_size = @getimagesize($media_item_url);
-           } catch (Exception $e){
+           } catch (Exception $e) {
                 $media_size = [0, 0];
            }
 
@@ -88,9 +88,9 @@ function media_bynder_get_object_by_id($id) {
  * @todo add support for type and effect
  */
 
-function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $media_item=FALSE, $fragment_idHash=FALSE){
+function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $media_item=FALSE, $fragment_idHash=FALSE) {
     $url = '';
-     if(!$type){
+     if (!$type) {
         $type = "thul";
     }
     if (!$media_item) {
@@ -103,7 +103,7 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $medi
             }
     }
 
-    if($effects){
+    if ($effects) {
         $rest_client = media_bynder_rest_client();
         $url = $rest_client->customResolutionUrl($media_item, $effects['width'], $effects['height']);
     } else if (isset($media_item['thumbnails'][$type])) {
@@ -124,7 +124,7 @@ function media_bynder_uri_parse_style_url($uri) {
 
     $target = file_uri_target($uri);
     $parts = explode('/', $target);
-    if(isset($parts[1]) && isset($parts[4]) && isset($parts[6])){
+    if (isset($parts[1]) && isset($parts[4]) && isset($parts[6])) {
         $data = array(
             "style" => $parts[1],
             "f" => $parts[4],
@@ -133,7 +133,7 @@ function media_bynder_uri_parse_style_url($uri) {
         );
         $image_styles = image_styles();
         $image_style = $image_styles[$data['style']];
-        foreach($image_style['effects'] as $effect){
+        foreach($image_style['effects'] as $effect) {
             $data['effects'][$effect['name']] = $effect['data'];
         }
         return $data;
@@ -148,7 +148,7 @@ function media_bynder_uri_parse_style_url($uri) {
 function media_bynder_idHash_from_uri($uri) {
     $parts = explode('/', $uri);
     foreach ($parts as $part_key => $part) {
-        if ($part == 'i'){
+        if ($part == 'i') {
             if (count($parts) >= ($part_key + 1)) {
                 return $parts[$part_key + 1];
             }
@@ -160,7 +160,7 @@ function media_bynder_idHash_from_uri($uri) {
 function media_bynder_id_from_uri($uri) {
     $parts = explode('/', $uri);
     foreach ($parts as $part_key => $part) {
-        if ($part == 'f'){
+        if ($part == 'f') {
             if (count($parts) >= ($part_key + 1)) {
                 return $parts[$part_key + 1];
             }
@@ -170,7 +170,7 @@ function media_bynder_id_from_uri($uri) {
 }
 
 function isValid($type, $val) {
-    switch($type){
+    switch($type) {
         case "uuid":
             return preg_match("/^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$/", val);
         case "idHash":

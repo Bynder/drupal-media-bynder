@@ -9,5 +9,6 @@ dependencies[] = oauth_common
 files[] = includes/BynderRestClient.inc
 files[] = includes/MediaBynderBrowser.inc
 files[] = includes/MediaBynderStreamWrapper.inc
+scripts[] = js/image.js
 
 configure = admin/config/content/media_bynder

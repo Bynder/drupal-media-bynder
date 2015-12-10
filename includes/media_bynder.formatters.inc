@@ -67,7 +67,6 @@ function media_bynder_file_formatter_image_settings($form, &$form_state, $settin
 }
 
 function media_bynder_field_info_alter(&$info) {
-    //TODO look up widget name
    $info['image']['default widget'] = 'media_bynder';
 }
 
@@ -118,7 +117,7 @@ function media_bynder_image_effect_info() {
  */
 function media_bynder_custom_resolution_effect(&$image, $data) {
     if (!media_bynder_custom_resolution($image)) {
-        watchdog('image', 'he image %file could not be colorize because the imagefilter() function is not available in this PHP installation.', array('%file' => $image->source), WATCHDOG_ERROR);
+        watchdog('image', 'The image %file could not be colorize because the imagefilter() function is not available in this PHP installation.', array('%file' => $image->source), WATCHDOG_ERROR);
         return FALSE;
     }
     return TRUE;

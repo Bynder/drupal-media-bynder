@@ -115,38 +115,17 @@ class BynderRestClient {
     }
 
     public function customResolutionUrl($file, $width, $height, $prefix=FALSE) {
-        $retries = 5;
-        if (isset($file['thumbnails']) && isset($file['idHash'])) {
-            $thumbnails = $file['thumbnails'];
+        if (isset($file['idHash'])) {
             $idHash  = $file['idHash'];
         } else {
             return FALSE;
         }
 
-        if ($prefix) {
-            $url = variable_get('media_bynder_url', '') . '/additional/';
-            return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
+        if (!$prefix) {
+            $prefix = 'thul';
         }
-
-        foreach ($thumbnails as $prefix => $thumbnail_url) {
-            $url = variable_get('media_bynder_url', '') . '/additional/';
-            $url .= $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
-            $this->options[CURLOPT_URL] = $url;
-            $result = $this->execute();
-
-            if ($result == 202) {
-                while($retries > 0 && $result == 202) {
-                    $result = $this->execute();
-                    $retries--;
-                    sleep(2);
-                }
-            } else if (!is_numeric($result) || $result == 302) {
-                return $url;
-            } else {
-                $this->error = 'statuscode $result: for prefix $prefix.';
-            }
-        }
-        return FALSE;
+        $url = variable_get('media_bynder_url', '') . '/additional/';
+        return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
     }
 
     public function getMediaObject($id) {
@@ -180,14 +159,14 @@ class BynderRestClient {
     }
     private function limitMetaProperties($result) {
         $limited_meta_properties = [];
-        foreach($result as $meta_property) {
+        foreach ($result as $meta_property) {
             $limited_meta_property = [];
             $limited_meta_property['id'] = $meta_property->id;
             $limited_meta_property['label'] = $meta_property->label;
             $limited_meta_property['name'] = $meta_property->name;
             $limited_meta_property['zindex'] = $meta_property->zindex;
 
-            foreach($meta_property->options as $option) {
+            foreach ($meta_property->options as $option) {
                 $limited_meta_property['options'][] = array(
                     "id" => $option->id,
                     "label" => $option->label,

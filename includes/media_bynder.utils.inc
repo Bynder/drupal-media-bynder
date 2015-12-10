@@ -18,43 +18,6 @@ function media_bynder_rest_client() {
     );
 }
 
-/**
-* @param array $media_item an array with with the complete selected image data
-* @return the same array with an extra array call 'details', which contains width, heigth, filesize and the url if available. Also builds an url for the original public url, stored in '-'.
-**/
-
-function media_bynder_media_item_detailed($media_item) {
-    $detailed_media_item = array();
-
-    if (isset($media_item['thumbnails'])) {
-        foreach ($media_item['thumbnails'] as $media_item_prefix => $media_item_url) {
-           try {
-                $media_size = @getimagesize($media_item_url);
-           } catch (Exception $e) {
-                $media_size = [0, 0];
-           }
-
-            $media_width = $media_size[0];
-            $media_height = $media_size[1];
-
-            if (isset(array_change_key_case(get_headers($media_item_url, TRUE))['content-length'])) {
-                $media_filesize = array_change_key_case(get_headers($media_item_url, TRUE))['content-length'];
-            } else {
-                $media_filesize = 0;
-            }
-
-            $detailed_media_item = [
-                'width' => $media_width,
-                'height' => $media_height,
-                'filesize' => $media_filesize,
-                'url' => $media_item_url
-            ];
-            $media_item['details'][$media_item_prefix] = $detailed_media_item;
-        }
-    }
-    return $media_item;
-}
-
 function media_bynder_get_object_by_hash($idHash) {
      $rest_client = media_bynder_rest_client();
     $current_results = $url = $rest_client->getAll()['media'];

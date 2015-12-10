@@ -70,7 +70,7 @@ function media_bynder_save_image($id, $form = null){
     if ($selected_media['type'] == 'image') {
         $file->filemime = 'image/jpeg';
     }
-    $file->filesize = 0;//$detailed_media['filesize'];
+    $file->filesize = 0;
     $file->filename = $selected_media['name'];
 
     if ($file === FALSE) {
@@ -613,7 +613,6 @@ function media_bynder_generate_results($results) {
 
     if (!empty($results)) {
         foreach ($results as $media_item) {
-          // TODO: replace this check with a link or alternative to show a image that doesn't have a thumbnail
           if (!empty($media_item['thumbnails']['thul'])) {
             $output['#items'][] = media_bynder_generate_result_current($media_item);
           }
@@ -646,12 +645,12 @@ function media_bynder_generate_result_current($media_item) {
             'class' => 'bynder-image',
             'rel' => $media_item['id'],
             'data-id' => $media_item['id'],
-            'data-idHash' => $media_item['idHash'] //fragmentId
+            'data-idHash' => $media_item['idHash']
         ),
         'html' => TRUE,
         'query' => array(
-            'id' => $media_item['id'], //fragmentId
-            'idHash' => $media_item['idHash'] //fragmentId
+            'id' => $media_item['id'],
+            'idHash' => $media_item['idHash']
         )
     ));
 }

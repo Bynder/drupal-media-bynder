@@ -11,6 +11,7 @@
 				},1000);
 			} else {
 				image.unbind('error');
+				image.attr('title', 'The image could not be retrieved, please contact Bynder Support');
 				image.attr('alt', 'The image could not be retrieved, please contact Bynder Support');
 			}
 		});

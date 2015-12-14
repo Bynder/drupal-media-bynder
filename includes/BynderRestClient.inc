@@ -114,20 +114,6 @@ class BynderRestClient {
         return $this->execute();
     }
 
-    public function customResolutionUrl($file, $width, $height, $prefix=FALSE) {
-        if (isset($file['idHash'])) {
-            $idHash  = $file['idHash'];
-        } else {
-            return FALSE;
-        }
-
-        if (!$prefix) {
-            $prefix = 'thul';
-        }
-        $url = variable_get('media_bynder_url', '') . '/additional/';
-        return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
-    }
-
     public function getMediaObject($id) {
         $this->options[CURLOPT_URL] = $this->baseRestUrl . '/media/' . $id . '/';
         return $this->execute();

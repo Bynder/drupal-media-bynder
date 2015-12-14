@@ -15,14 +15,6 @@ include_once 'BynderRestClient.inc';
 function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     module_load_include('inc', 'media', 'includes/media.browser');
 
-    $rest_client = media_bynder_rest_client();
-    $all_results = $rest_client->getFacets('');
-
-    if (is_string($all_results)) {
-        $all_media = json_decode($all_results, TRUE);
-        variable_set('all_media', $all_media);
-    }
-
     $form['#attached']['library'][] = array('media_bynder', 'media_bynder_administration');
 
     $form['#attached']['css'][] = array(
@@ -48,9 +40,9 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     if ($selected_asset) {
         $id = media_bynder_id_from_uri($selected_asset);
         $result = media_bynder_save_image($id, $form);
-        if(!$result['success']){
+        if (!$result['success']) {
             drupal_set_message(t($result['message']), 'error');
-        }else{
+        } else {
             drupal_goto('/media/browser', array('query' => array(
                 'render' => 'media-popup',
                 'fid' => $result['fid']

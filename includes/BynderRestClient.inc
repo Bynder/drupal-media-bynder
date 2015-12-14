@@ -88,7 +88,7 @@ class BynderRestClient {
             return FALSE;
         } elseif ($http_code != 200) {
             $this->error = $response;
-            return FALSE;
+            return $http_code;
         } else {
             return $response;
         }
@@ -114,6 +114,20 @@ class BynderRestClient {
         return $this->execute();
     }
 
+    public function customResolutionUrl($file, $width, $height, $prefix=FALSE) {
+        if (isset($file['idHash'])) {
+            $idHash  = $file['idHash'];
+        } else {
+            return FALSE;
+        }
+
+        if (!$prefix) {
+            $prefix = 'thul';
+        }
+        $url = variable_get('media_bynder_url', '') . '/additional/';
+        return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
+    }
+
     public function getMediaObject($id) {
         $this->options[CURLOPT_URL] = $this->baseRestUrl . '/media/' . $id . '/';
         return $this->execute();
@@ -127,6 +141,14 @@ class BynderRestClient {
         return $result->count;
     }
 
+    public function getAll() {
+        $this->options[CURLOPT_URL] = $this->baseRestUrl . '/media/?count=1';
+        $result = $this->execute();
+        $result = json_decode($result, TRUE);
+
+        return $result;
+    }
+
     public function getMetaProperties() {
         $this->options[CURLOPT_URL] = $this->baseRestUrl . '/metaproperties/';
         $result = $this->execute();
@@ -137,21 +159,21 @@ class BynderRestClient {
     }
     private function limitMetaProperties($result) {
         $limited_meta_properties = [];
-        foreach($result as $meta_property) {
+        foreach ($result as $meta_property) {
             $limited_meta_property = [];
             $limited_meta_property['id'] = $meta_property->id;
             $limited_meta_property['label'] = $meta_property->label;
             $limited_meta_property['name'] = $meta_property->name;
             $limited_meta_property['zindex'] = $meta_property->zindex;
 
-            foreach($meta_property->options as $option){
+            foreach ($meta_property->options as $option) {
                 $limited_meta_property['options'][] = array(
                     "id" => $option->id,
                     "label" => $option->label,
                     "name" => $option->name
                 );
             }
-            if(isset($limited_meta_property['options']) && count($limited_meta_property['options']) > 0) {
+            if (isset($limited_meta_property['options']) && count($limited_meta_property['options']) > 0) {
                 $limited_meta_properties[] = $limited_meta_property;
             }
         }

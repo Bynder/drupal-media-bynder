@@ -9,20 +9,7 @@
 class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
 
     public function interpolateUrl() {
-        $this->base_url = variable_get('media_bynder_url', '');
-
-        if ($parameters = $this->get_parameters()) {
-            return media_bynder_embed_url($parameters['i']);
-        } else {
-            $parameters = media_bynder_uri_parse_style_url($this->uri);
-            if ($parameters) {
-                $build_url = media_bynder_embed_url($parameters['i'], $parameters['style'], $parameters['effects']);
-                if (validateBynderDrupalUrl($build_url)) {
-                    return $build_url;
-                }
-            }
-        }
-        return FALSE;
+       return @media_bynder_embed_url($this->parameters['f']);
     }
 
     /**
@@ -42,9 +29,6 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
      *   The path to the thumbnail.
      */
     public function getWebimagePath() {
-        $parts = $this->get_parameters();
-        $url = media_bynder_embed_url($parts['i'], 'web');
-        return $url;
+        return @media_bynder_embed_url($this->parameters['f']);
     }
-
 }

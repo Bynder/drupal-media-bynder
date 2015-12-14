@@ -46,10 +46,8 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
 
     $selected_asset = media_bynder_parameter($_POST, 'selected_asset');
     if ($selected_asset) {
-        $asset_data = media_bynder_uri_parse_url($selected_asset);
-        $id = $asset_data['i'];
-        $idHash = $asset_data['f'];
-        $result = media_bynder_save_image($id, $idHash, $form);
+        $id = media_bynder_id_from_uri($selected_asset);
+        $result = media_bynder_save_image($id, $form);
         if(!$result['success']){
             drupal_set_message(t($result['message']), 'error');
         }else{
@@ -59,29 +57,21 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
             )));
         }
     }
-
     return array('bynder' => $data);
 }
 
-function media_bynder_save_image($id, $idHash, $form = null){
-    $rest_client = media_bynder_rest_client();
-    $result = $rest_client->getMediaObject($id);
-
-    if ($result) {
-        $arr_json = json_decode($result, TRUE);
-        variable_set('current_media', $arr_json);
-    } else {
-        return array('success' => 0, 'message' => $rest_client->error);
-    }
+function media_bynder_save_image($id, $form = null){
+    $selected_media = media_bynder_get_object_by_id($id);
+    $idHash = $selected_media['idHash'];
 
     $uri = file_stream_wrapper_uri_normalize("bynder://f/$id/i/$idHash");
     $file = file_uri_to_object($uri, TRUE);
 
-    if ($arr_json['type'] == 'image') {
+    if ($selected_media['type'] == 'image') {
         $file->filemime = 'image/jpeg';
     }
     $file->filesize = 0;
-    $file->filename = $arr_json['name'];
+    $file->filename = $selected_media['name'];
 
     if ($file === FALSE) {
         return array('success' => 0, 'message' => 'An error occurred and no file was added to your Library.');
@@ -107,6 +97,7 @@ function media_bynder_save_image($id, $idHash, $form = null){
 function media_bynder_generate_search($state) {
     global $filter_labels;
     global $meta_property_prefix;
+
     $meta_property_prefix = 'property_';
 
     $data = array('#type' => 'fieldset');
@@ -583,9 +574,11 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
     }
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->search($query, $start_index, $nr_of_results);
+    $all_results = $rest_client->getAll();
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);
+        variable_set('search_result', $all_results);
         if (isset($arr_json['count']['total'])) {
             $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
         }
@@ -620,7 +613,6 @@ function media_bynder_generate_results($results) {
 
     if (!empty($results)) {
         foreach ($results as $media_item) {
-          // TODO: replace this check with a link or alternative to show a image that doesn't have a thumbnail
           if (!empty($media_item['thumbnails']['thul'])) {
             $output['#items'][] = media_bynder_generate_result_current($media_item);
           }
@@ -653,12 +645,12 @@ function media_bynder_generate_result_current($media_item) {
             'class' => 'bynder-image',
             'rel' => $media_item['id'],
             'data-id' => $media_item['id'],
-            'data-idHash' => $media_item['idHash'] //fragmentId
+            'data-idHash' => $media_item['idHash']
         ),
         'html' => TRUE,
         'query' => array(
-            'id' => $media_item['id'], //fragmentId
-            'idHash' => $media_item['idHash'] //fragmentId
+            'id' => $media_item['id'],
+            'idHash' => $media_item['idHash']
         )
     ));
 }

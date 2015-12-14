@@ -88,7 +88,7 @@ class BynderRestClient {
             return FALSE;
         } elseif ($http_code != 200) {
             $this->error = $response;
-            return $http_code;
+            return FALSE;
         } else {
             return $response;
         }
@@ -123,7 +123,6 @@ class BynderRestClient {
         $this->options[CURLOPT_URL] = $this->baseRestUrl . '/media/?count=1' . $query;
         $result = $this->execute();
         $result = json_decode($result);
-
         return $result->count;
     }
 
@@ -131,7 +130,6 @@ class BynderRestClient {
         $this->options[CURLOPT_URL] = $this->baseRestUrl . '/media/?count=1';
         $result = $this->execute();
         $result = json_decode($result, TRUE);
-
         return $result;
     }
 

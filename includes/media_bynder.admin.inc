@@ -14,17 +14,19 @@ include_once 'BynderRestClient.inc';
  */
 function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     module_load_include('inc', 'media', 'includes/media.browser');
-
     $form['#attached']['library'][] = array('media_bynder', 'media_bynder_administration');
-
     $form['#attached']['css'][] = array(
         'type' => 'external',
         'data' => '//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css',
     );
-
     drupal_process_attached($form);
 
+    $rest_client = media_bynder_rest_client();
+    $current_results = $rest_client->getAll()['media'];
+    variable_set('all_results', $current_results);
+
     $id = media_bynder_parameter($_POST, 'id');
+
     if ($id !== NULL) {
         media_bynder_submit_mob($form, $form_state);
         return;
@@ -566,11 +568,9 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
     }
     $rest_client = media_bynder_rest_client();
     $result = $rest_client->search($query, $start_index, $nr_of_results);
-    $all_results = $rest_client->getAll();
 
     if ($result) {
         $arr_json = json_decode($result, TRUE);
-        variable_set('search_result', $all_results);
         if (isset($arr_json['count']['total'])) {
             $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
         }

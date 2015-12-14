@@ -19,7 +19,14 @@ function media_bynder_rest_client() {
 }
 
 function media_bynder_get_object_by_hash($idHash) {
-     $rest_client = media_bynder_rest_client();
+    $all_results = variable_get('all_results');
+    foreach ($all_results as $current_result) {
+        if ($current_result['idHash'] == $id) {
+            return $current_result;
+        }
+    }
+
+    $rest_client = media_bynder_rest_client();
     $current_results = $rest_client->getAll()['media'];
 
     foreach ($current_results as $current_result) {
@@ -31,6 +38,13 @@ function media_bynder_get_object_by_hash($idHash) {
 }
 
 function media_bynder_get_object_by_id($id) {
+    $all_results = variable_get('all_results');
+    foreach ($all_results as $current_result) {
+        if ($current_result['idHash'] == $id) {
+            return $current_result;
+        }
+    }
+
     $rest_client = media_bynder_rest_client();
     $current_results = $rest_client->getAll()['media'];
 
@@ -134,7 +148,7 @@ function media_bynder_id_from_uri($uri) {
 function isValid($type, $val) {
     switch($type) {
         case "uuid":
-            return preg_match("/^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$/", val);
+            return preg_match("/^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}$/", $val);
         case "idHash":
             return preg_match("/[a-f0-9]{16}/", $val);
         case "bynder_drupal_url":
@@ -152,7 +166,7 @@ function validateId($str) {
         error_log("Invalid ID: " . $str);
         return FALSE;
     }
-};
+}
 
 function validateUUID($str) {
     if (isValid("uuid", $str)) {

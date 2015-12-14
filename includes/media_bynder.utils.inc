@@ -21,7 +21,7 @@ function media_bynder_rest_client() {
 function media_bynder_get_object_by_hash($idHash) {
     $all_results = variable_get('all_results');
     foreach ($all_results as $current_result) {
-        if ($current_result['idHash'] == $id) {
+        if ($current_result['idHash'] == $idHash) {
             return $current_result;
         }
     }
@@ -30,7 +30,7 @@ function media_bynder_get_object_by_hash($idHash) {
     $current_results = $rest_client->getAll()['media'];
 
     foreach ($current_results as $current_result) {
-        if ($current_result['idHash'] == $id) {
+        if ($current_result['idHash'] == $idHash) {
             return $current_result;
         }
     }
@@ -40,7 +40,7 @@ function media_bynder_get_object_by_hash($idHash) {
 function media_bynder_get_object_by_id($id) {
     $all_results = variable_get('all_results');
     foreach ($all_results as $current_result) {
-        if ($current_result['idHash'] == $id) {
+        if ($current_result['id'] == $id) {
             return $current_result;
         }
     }
@@ -94,28 +94,8 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $medi
  * Parse the style out of the uri.
  */
 function media_bynder_uri_parse_style_url($uri) {
-    if (validateBynderDrupalUrl($uri) == FALSE) {
-        return FALSE;
-    }
-
-    $target = file_uri_target($uri);
-    $parts = explode('/', $target);
-    if (isset($parts[1]) && isset($parts[4]) && isset($parts[6])) {
-        $data = array(
-            "style" => $parts[1],
-            "f" => $parts[4],
-            "i" => $parts[6],
-            "effects" => []
-        );
-        $image_styles = image_styles();
-        $image_style = $image_styles[$data['style']];
-        foreach($image_style['effects'] as $effect) {
-            $data['effects'][$effect['name']] = $effect['data'];
-        }
-        return $data;
-    } else {
-        return FALSE;
-    }
+    $idHash = media_bynder_idHash_from_uri($uri);
+    return variable_get('media_bynder_url', '')  .  '/m/' .  $idHash . '/original/';
 }
 
 /**

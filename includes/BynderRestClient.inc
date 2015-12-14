@@ -88,7 +88,7 @@ class BynderRestClient {
             return FALSE;
         } elseif ($http_code != 200) {
             $this->error = $response;
-            return $http_code;
+            return FALSE;
         } else {
             return $response;
         }

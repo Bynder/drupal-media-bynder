@@ -80,10 +80,10 @@ function media_bynder_image_default_styles() {
     $styles = array();
 
     $styles['bynder_drupal_example'] = array(
-        'label' => t('Bynder Example (400x400 crop)'),
+        'label' => t('Bynder Example (400x400)'),
         'effects' => array(
             array(
-                'name' => 'bynder_custom_resolution_crop',
+                'name' => 'bynder_custom_resolution_resize',
                 'data' => array(
                     'width' => 400,
                     'height' => 400
@@ -108,13 +108,20 @@ function media_bynder_image_effect_info() {
             'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
             'form callback'=> 'image_resize_form',
         ),
-         'bynder_custom_resolution_extend' => array(
+        'bynder_custom_resolution_extend' => array(
             'label' => t('Bynder custom resolution extend'),
             'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
             'effect callback'=> 'media_bynder_custom_resolution_effect',
             'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
             'form callback'=> 'image_resize_form',
-        )
+        ),
+        'bynder_custom_resolution_resize' => array(
+            'label' => t('Bynder custom resolution resize'),
+             'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
+             'effect callback'=> 'media_bynder_custom_resolution_effect',
+             'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
+             'form callback'=> 'image_resize_form',
+         )
     );
 }
 
@@ -162,7 +169,7 @@ function media_bynder_preprocess_image(&$vars) {
     foreach ($image_styles as $image_style_key => $image_style) {
         if ($vars['style_name'] == $image_style_key) {
             foreach ($image_style['effects'] as $effect_key => $effect) {
-                if ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend') {
+                if ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize') {
                     $fragment_id = media_bynder_id_from_uri($vars['path']);
                     $vars['path'] = media_bynder_embed_url($fragment_id, 'thul', $effect);
                     break;

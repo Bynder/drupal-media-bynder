@@ -187,6 +187,10 @@ function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
     }
     $url = variable_get('media_bynder_url', '') . '/additional/';
     $effect = str_replace('bynder_custom_resolution_', '', $effect);
-    return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height . '&' . $effect . '=1';
+    if ($effect == 'resize') {
+        return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
+    } else {
+        return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height . '&' . $effect . '=1';
+    }
 }
 

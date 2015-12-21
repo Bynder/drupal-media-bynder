@@ -81,7 +81,7 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $medi
     }
 
     if ($effects) {
-        $url = customResolutionUrl($media_item, $effects['width'], $effects['height']);
+        $url = customResolutionUrl($media_item, $effects['data']['width'], $effects['data']['height'], $effects['name']);
     } else if (isset($media_item['thumbnails'][$type])) {
         $url = $media_item['thumbnails'][$type];
     } else {
@@ -175,7 +175,7 @@ function validateBynderDrupalUrl($str) {
     }
 }
 
-function customResolutionUrl($file, $width, $height, $prefix=FALSE) {
+function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
     if (isset($file['idHash'])) {
         $idHash  = $file['idHash'];
     } else {
@@ -186,6 +186,11 @@ function customResolutionUrl($file, $width, $height, $prefix=FALSE) {
         $prefix = 'thul';
     }
     $url = variable_get('media_bynder_url', '') . '/additional/';
-    return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
+    $effect = str_replace('bynder_custom_resolution_', '', $effect);
+    if ($effect == 'resize') {
+        return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;
+    } else {
+        return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height . '&' . $effect . '=1';
+    }
 }
 

@@ -180,7 +180,95 @@ function media_bynder_preprocess_image(&$vars) {
     return FALSE;
 }
 
-
+/**
+ * Implements hook_preprocess_image_style().
+ * Change the URI of the image to the real URL
+ */
 function media_bynder_preprocess_image_style(&$variables) {
     $variables['uri'] = $variables['path'];
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ * Add a new formatter for field type "image"
+ */
+function media_bynder_field_formatter_info() {
+    return array(
+        'media_bynder_absolute_url' => array(
+            'label' => t('Absolute URL'),
+            'field types' => array('image'),
+            'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+            'settings' => array(
+                'tooltip' => t('Bynder function that returns the image URL.'),
+                'image_style' => 'bynder_drupal_example'
+            )
+        )
+    );
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function media_bynder_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+    $settings = $instance['display'][$view_mode]['settings'];
+    $options = array();
+
+    foreach (image_styles() as $image_style) {
+        $options[$image_style['name']] = $image_style['label'];
+    }
+
+    $element = array();
+
+    $element['image_style'] = array(
+        '#type' => 'select',
+        '#title' => t('Image Style'),
+        '#description' => t('Select your Image Style, for which to get the absolute URL'),
+        '#default_value' => $settings['image_style'],
+        '#options' => $options
+    );
+
+    return $element;
+}
+
+function media_bynder_field_formatter_settings_summary($field, $instance, $view_mode) {
+    $display = $instance['display'][$view_mode];
+    $settings = $display['settings'];
+    $summary = t('Return the absolute URL with <b> @style </b> Image Style',
+        array('@style' => $settings['image_style'])
+    );
+  return $summary;
+}
+
+/**
+ * Implements hook_field_formatter_view(). This code just passes straight
+ * through to a theme function, MYMODULE_formatter_FORMATTER
+ * (e.g. MYMODULE_formatter_MYMODULE_absolute_url).
+ */
+function media_bynder_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+    $element = array();
+    $settings = $display['settings'];
+
+    if ($display['type'] == 'media_bynder_absolute_url') {
+        $effects = image_styles()[$settings['image_style']];
+
+        foreach ($effects as $effect) {
+            if (is_array($effect)) {
+                $effect = reset($effect);
+                $effect_name = $effect['name'];
+
+                if (strpos($effect_name, 'bynder') !== false) {
+                    $effect_width = $effect['data']['width'];
+                    $effect_height = $effect['data']['height'];
+
+                    $media_item = array();
+                    $media_item['idHash'] = media_bynder_idHash_from_uri($items[0]['uri']);
+                    $image_url = customResolutionUrl($media_item, $effect_width, $effect_height, $effect_name);
+                    $element[0]['#markup'] = $image_url;
+
+                    return $element;
+                }
+            }
+        }
+    }
+    return FALSE;
 }

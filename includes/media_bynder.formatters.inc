@@ -230,25 +230,27 @@ function media_bynder_field_formatter_settings_form($field, $instance, $view_mod
     return $element;
 }
 
+/**
+ * Implements hook_field_formatter_settings_summary.
+ * The summary for the "manage display view"
+ */
 function media_bynder_field_formatter_settings_summary($field, $instance, $view_mode) {
     $display = $instance['display'][$view_mode];
     $settings = $display['settings'];
     $summary = t('Return the absolute URL with <b> @style </b> Image Style',
         array('@style' => $settings['image_style'])
     );
-  return $summary;
+
+    return $summary;
 }
 
 /**
- * Implements hook_field_formatter_view(). This code just passes straight
- * through to a theme function, MYMODULE_formatter_FORMATTER
- * (e.g. MYMODULE_formatter_MYMODULE_absolute_url).
+ * Implements hook_field_formatter_view().
+ * Returns the absolute URL for the custom calls
  */
 function media_bynder_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-    $element = array();
-    $settings = $display['settings'];
-
     if ($display['type'] == 'media_bynder_absolute_url') {
+        $settings = $display['settings'];
         $effects = image_styles()[$settings['image_style']];
 
         foreach ($effects as $effect) {
@@ -260,12 +262,17 @@ function media_bynder_field_formatter_view($entity_type, $entity, $field, $insta
                     $effect_width = $effect['data']['width'];
                     $effect_height = $effect['data']['height'];
 
-                    $media_item = array();
-                    $media_item['idHash'] = media_bynder_idHash_from_uri($items[0]['uri']);
-                    $image_url = customResolutionUrl($media_item, $effect_width, $effect_height, $effect_name);
-                    $element[0]['#markup'] = $image_url;
+                    if (!empty($items)) {
+                        $media_item = array(
+                            'idHash' => media_bynder_idHash_from_uri($items[0]['uri'])
+                        );
 
-                    return $element;
+                        $element = array();
+                        $image_url = customResolutionUrl($media_item, $effect_width, $effect_height, $effect_name);
+                        $element[0]['#markup'] = $image_url;
+
+                        return $element;
+                    }
                 }
             }
         }

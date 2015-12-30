@@ -251,10 +251,12 @@ function media_bynder_field_formatter_settings_summary($field, $instance, $view_
 function media_bynder_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
     if ($display['type'] == 'media_bynder_absolute_url') {
         $settings = $display['settings'];
+        //global Drupal function
         $effects = image_styles()[$settings['image_style']];
 
         foreach ($effects as $effect) {
             if (is_array($effect)) {
+                //array is not 0-based
                 $effect = reset($effect);
                 $effect_name = $effect['name'];
 
@@ -268,6 +270,7 @@ function media_bynder_field_formatter_view($entity_type, $entity, $field, $insta
                         );
 
                         $element = array();
+                        // global function from media_bynder.utils.inc
                         $image_url = customResolutionUrl($media_item, $effect_width, $effect_height, $effect_name);
                         $element[0]['#markup'] = $image_url;
 

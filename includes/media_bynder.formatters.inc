@@ -185,7 +185,9 @@ function media_bynder_preprocess_image(&$vars) {
  * Change the URI of the image to the real URL
  */
 function media_bynder_preprocess_image_style(&$variables) {
-    $variables['uri'] = $variables['path'];
+    if (file_uri_scheme($variables['uri']) == 'bynder') {
+        $variables['uri'] = $variables['path'];
+    }
 }
 
 /**

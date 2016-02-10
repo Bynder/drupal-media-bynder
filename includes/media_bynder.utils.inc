@@ -35,7 +35,7 @@ function media_bynder_get_object_by_id($id) {
 function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE) {
     $url = '';
      if (!$type) {
-        $type = "thul";
+        $type = 'thul';
     }
 
     if (isset($fragment_id)) {
@@ -47,7 +47,8 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE) {
     } else if (isset($media_item['thumbnails'][$type])) {
         $url = $media_item['thumbnails'][$type];
     } else {
-        return "https://www.getbynder.com/en/assets/Image/Vertical(1).png";
+        //fallback image
+        $url = $base_url . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
     }
     return $url;
 }

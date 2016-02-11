@@ -121,6 +121,11 @@ function validateIdHash($str) {
     }
 }
 
+function media_bynder_uri_parse_style_url($uri) {
+    $idHash = media_bynder_idHash_from_uri($uri);
+    return variable_get('media_bynder_url', '')  .  '/m/' .  $idHash . '/original/';
+}
+
 function validateBynderDrupalUrl($str) {
     if (isValid('bynder_drupal_url', $str)) {
         return $str;

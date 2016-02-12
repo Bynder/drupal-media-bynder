@@ -171,7 +171,7 @@ function media_bynder_preprocess_image(&$vars) {
             foreach ($image_style['effects'] as $effect_key => $effect) {
                 if ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize') {
                     $fragment_id = media_bynder_id_from_uri($vars['path']);
-                    $vars['path'] = media_bynder_embed_url($fragment_id, 'thul', $effect);
+                    $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
                     break;
                 }
             }

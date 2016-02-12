@@ -18,42 +18,9 @@ function media_bynder_rest_client() {
     );
 }
 
-function media_bynder_get_object_by_hash($idHash) {
-    $all_results = variable_get('all_results');
-    foreach ($all_results as $current_result) {
-        if ($current_result['idHash'] == $idHash) {
-            return $current_result;
-        }
-    }
-
-    $rest_client = media_bynder_rest_client();
-    $current_results = $rest_client->getAll()['media'];
-
-    foreach ($current_results as $current_result) {
-        if ($current_result['idHash'] == $idHash) {
-            return $current_result;
-        }
-    }
-    return FALSE;
-}
-
 function media_bynder_get_object_by_id($id) {
-    $all_results = variable_get('all_results');
-    foreach ($all_results as $current_result) {
-        if ($current_result['id'] == $id) {
-            return $current_result;
-        }
-    }
-
     $rest_client = media_bynder_rest_client();
-    $current_results = $rest_client->getAll()['media'];
-
-    foreach ($current_results as $current_result) {
-        if ($current_result['id'] == $id) {
-            return $current_result;
-        }
-    }
-    return FALSE;
+    return json_decode($rest_client->getMediaObject($id), TRUE);
 }
 
 /**
@@ -65,19 +32,14 @@ function media_bynder_get_object_by_id($id) {
  * @todo add support for type and effect
  */
 
-function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $media_item=FALSE, $fragment_idHash=FALSE) {
+function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE) {
     $url = '';
      if (!$type) {
-        $type = "thul";
+        $type = 'thul';
     }
-    if (!$media_item) {
-            if (isset($fragment_id)) {
-                $media_item = media_bynder_get_object_by_id($fragment_id);
-            } else {
-                if ($fragment_idHash) {
-                    $media_item = media_bynder_get_object_by_hash($fragment_idHash);
-                }
-            }
+
+    if (isset($fragment_id)) {
+        $media_item = media_bynder_get_object_by_id($fragment_id);
     }
 
     if ($effects) {
@@ -85,17 +47,10 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $medi
     } else if (isset($media_item['thumbnails'][$type])) {
         $url = $media_item['thumbnails'][$type];
     } else {
-        return FALSE;
+        //fallback image
+        $url = $base_url . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
     }
     return $url;
-}
-
-/**
- * Parse the style out of the uri.
- */
-function media_bynder_uri_parse_style_url($uri) {
-    $idHash = media_bynder_idHash_from_uri($uri);
-    return variable_get('media_bynder_url', '')  .  '/m/' .  $idHash . '/original/';
 }
 
 /**
@@ -166,6 +121,11 @@ function validateIdHash($str) {
     }
 }
 
+function media_bynder_uri_parse_style_url($uri) {
+    $idHash = media_bynder_idHash_from_uri($uri);
+    return variable_get('media_bynder_url', '')  .  '/m/' .  $idHash . '/original/';
+}
+
 function validateBynderDrupalUrl($str) {
     if (isValid('bynder_drupal_url', $str)) {
         return $str;
@@ -177,7 +137,7 @@ function validateBynderDrupalUrl($str) {
 
 function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
     if (isset($file['idHash'])) {
-        $idHash  = $file['idHash'];
+        $idHash = $file['idHash'];
     } else {
         return FALSE;
     }

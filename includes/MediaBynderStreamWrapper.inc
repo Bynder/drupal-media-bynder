@@ -18,9 +18,7 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
      *   The path to the thumbnail.
      */
     public function getOriginalThumbnailPath() {
-        $parts = $this->get_parameters();
-        $url = media_bynder_embed_url($parts['i'], 'thul');
-        return $url;
+        return @media_bynder_embed_url($this->parameters['f']);
     }
 
     /**

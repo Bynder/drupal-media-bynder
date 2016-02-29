@@ -9,7 +9,7 @@ jQuery(document).ready(function() {
         }, 3000);
         $retries--;
     if(retries < 0){
-        jQuery('.field-items .field-item img').unbind('error');
+        $img.unbind('error');
     }
     });
 });

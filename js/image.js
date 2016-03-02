@@ -2,7 +2,7 @@
 Do this by replacing the image source. */
 jQuery(document).ready(function() {
     $retries = 3;
-    jQuery('.field-items .field-item img').error(function() {
+    jQuery('.field-items .field-item img, div > div > div > div > p > img').error(function() {
         $img = jQuery(this);
         setTimeout(function() {
             $img.attr('src', $img.attr('src'));

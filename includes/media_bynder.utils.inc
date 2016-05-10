@@ -145,7 +145,7 @@ function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
     if (!$prefix) {
         $prefix = 'thul';
     }
-    $url = variable_get('media_bynder_url', '') . '/additional/';
+    $url = variable_get('media_bynder_cdn_url', variable_get('media_bynder_url', '')) . '/additional/';
     $effect = str_replace('bynder_custom_resolution_', '', $effect);
     if ($effect == 'resize') {
         return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;

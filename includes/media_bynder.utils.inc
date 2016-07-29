@@ -32,14 +32,20 @@ function media_bynder_get_object_by_id($id) {
  * @todo add support for type and effect
  */
 
-function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE) {
+function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $idHash=FALSE) {
     $url = '';
      if (!$type) {
         $type = 'bynder_custom';
     }
 
+    if(isset($fragment_id) && !$idHash) {
+        $media_item = media_bynder_get_object_by_id($fragment_id);
+    } else {
+        $media_item = ['idHash' => $fragment_id];
+    }
+
     if ($effects) {
-        $url = customResolutionUrl($fragment_id, $effects['data']['width'], $effects['data']['height'], $effects['name']);
+        $url = customResolutionUrl($media_item, $effects['data']['width'], $effects['data']['height'], $effects['name']);
     } else if (isset($media_item['thumbnails'][$type])) {
         $url = $media_item['thumbnails'][$type];
     } else {
@@ -67,6 +73,18 @@ function media_bynder_idHash_from_uri($uri) {
 function media_bynder_id_from_uri($uri) {
     $parts = explode('/', $uri);
     foreach ($parts as $part_key => $part) {
+        if ($part == 'f') {
+            if (count($parts) >= ($part_key + 1)) {
+                return $parts[$part_key + 1];
+            }
+        }
+    }
+    return FALSE;
+}
+
+function media_bynder_id_from_url($url) {
+    $parts = explode('/', $url);
+    foreach ($parts as $part_key => $part) {
         if ($part == 'm') {
             if (count($parts) >= ($part_key + 1)) {
                 return $parts[$part_key + 1];
@@ -75,6 +93,7 @@ function media_bynder_id_from_uri($uri) {
     }
     return FALSE;
 }
+
 
 function isValid($type, $val) {
     switch($type) {
@@ -131,7 +150,12 @@ function validateBynderDrupalUrl($str) {
     }
 }
 
-function customResolutionUrl($idHash, $width, $height, $effect, $prefix=FALSE) {
+function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
+    if (isset($file['idHash'])) {
+        $idHash = $file['idHash'];
+    } else {
+        return FALSE;
+    }
     if (!$prefix) {
         $prefix = 'drupal_custom';
     }

@@ -32,14 +32,16 @@ function media_bynder_get_object_by_id($id) {
  * @todo add support for type and effect
  */
 
-function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE) {
+function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $idHash=FALSE) {
     $url = '';
      if (!$type) {
-        $type = 'thul';
+        $type = 'bynder_custom';
     }
 
-    if (isset($fragment_id)) {
+    if(isset($fragment_id) && !$idHash) {
         $media_item = media_bynder_get_object_by_id($fragment_id);
+    } else {
+        $media_item = ['idHash' => $fragment_id];
     }
 
     if ($effects) {
@@ -72,6 +74,18 @@ function media_bynder_id_from_uri($uri) {
     $parts = explode('/', $uri);
     foreach ($parts as $part_key => $part) {
         if ($part == 'f') {
+            if (count($parts) >= ($part_key + 1)) {
+                return $parts[$part_key + 1];
+            }
+        }
+    }
+    return FALSE;
+}
+
+function media_bynder_id_from_url($url) {
+    $parts = explode('/', $url);
+    foreach ($parts as $part_key => $part) {
+        if ($part == 'm') {
             if (count($parts) >= ($part_key + 1)) {
                 return $parts[$part_key + 1];
             }
@@ -141,9 +155,8 @@ function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
     } else {
         return FALSE;
     }
-
     if (!$prefix) {
-        $prefix = 'thul';
+        $prefix = 'drupal_custom';
     }
     $url = variable_get('media_bynder_url', '') . '/additional/';
     $effect = str_replace('bynder_custom_resolution_', '', $effect);

@@ -94,7 +94,6 @@ function media_bynder_id_from_url($url) {
     return FALSE;
 }
 
-
 function isValid($type, $val) {
     switch($type) {
         case "uuid":

@@ -169,9 +169,14 @@ function media_bynder_preprocess_image(&$vars) {
     foreach ($image_styles as $image_style_key => $image_style) {
         if ($vars['style_name'] == $image_style_key) {
             foreach ($image_style['effects'] as $effect_key => $effect) {
-                if ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize') {
+                if (strpos($vars['path'], variable_get('media_bynder_url')) !== false && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')) {
                     $fragment_id = media_bynder_id_from_uri($vars['path']);
-                    $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
+                    if ($fragment_id) {
+                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
+                    } else {
+                        $fragment_id = media_bynder_id_from_url($vars['path']);
+                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
+                    }
                     break;
                 }
             }

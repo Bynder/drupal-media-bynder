@@ -40,12 +40,27 @@ function media_bynder_file_formatter_image_view($file, $display, $langcode) {
         $image_style = $display['settings']['image_style'];
         $valid_image_styles = image_style_options(FALSE);
 
-            $element = array(
-                '#theme' => 'image',
-                '#path' => $wrapper->getWebimagePath(),
-                '#alt' => isset($file->override['attributes']['alt']) ? $file->override['attributes']['alt'] : $file->filename,
-                '#suffix' => '<p class="media_object_type_' . ucfirst($file->type) . '">' . ucfirst($file->type) . '</p>'
-            );
+        $effect = $type = $idHash = FALSE;
+        $effects = image_styles()[$image_style];
+
+        foreach ($effects as $effect) {
+            if (is_array($effect)) {
+                //array is not 0-based
+                $effect = reset($effect);
+
+                if (strpos($effect['name'], 'bynder') !== false) {
+                    break;
+                }
+            }
+        }
+
+        $element = array(
+            '#theme' => 'image',
+            '#path' => $wrapper->getWebImagePath($type, $effect, $idHash),
+            '#style_name' => $image_style,
+            '#alt' => isset($file->override['attributes']['alt']) ? $file->override['attributes']['alt'] : $file->filename,
+            '#suffix' => '<p class="media_object_type_' . ucfirst($file->type) . '">' . ucfirst($file->type) . '</p>'
+        );
 
         return $element;
     }
@@ -166,19 +181,19 @@ function media_bynder_preprocess_image(&$vars) {
 
     $image_styles = image_styles();
 
-    foreach ($image_styles as $image_style_key => $image_style) {
-        if ($vars['style_name'] == $image_style_key) {
-            foreach ($image_style['effects'] as $effect_key => $effect) {
-                if (strpos($vars['path'], variable_get('media_bynder_url')) !== false && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')) {
-                    $fragment_id = media_bynder_id_from_uri($vars['path']);
-                    if ($fragment_id) {
-                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
-                    } else {
-                        $fragment_id = media_bynder_id_from_url($vars['path']);
-                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
-                    }
-                    break;
+    if (isset($image_styles[$vars['style_name']])) {
+        $image_style = $image_styles[$vars['style_name']];
+        foreach ($image_style['effects'] as $effect_key => $effect) {
+            if (strpos($vars['path'], variable_get('media_bynder_url')) !== FALSE && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')) {
+                $fragment_id = media_bynder_id_from_uri($vars['path']);
+                if ($fragment_id) {
+                    $vars['path'] = media_bynder_embed_url($fragment_id, FALSE, $effect);
                 }
+                else {
+                    $fragment_id = media_bynder_id_from_url($vars['path']);
+                    $vars['path'] = media_bynder_embed_url($fragment_id, FALSE, $effect, TRUE);
+                }
+              break;
             }
         }
     }

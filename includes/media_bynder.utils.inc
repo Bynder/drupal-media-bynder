@@ -48,9 +48,10 @@ function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $idHa
         $url = customResolutionUrl($media_item, $effects['data']['width'], $effects['data']['height'], $effects['name']);
     } else if (isset($media_item['thumbnails'][$type])) {
         $url = $media_item['thumbnails'][$type];
-    } else {
+    }
+    if (!$url) {
         //fallback image
-        $url = $base_url . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
+        $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
     }
     return $url;
 }

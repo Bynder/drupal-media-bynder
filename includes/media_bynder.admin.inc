@@ -739,6 +739,15 @@ function media_bynder_form($form, &$form_state) {
         '#required' => TRUE
     );
 
+    $form['media_bynder_settings']['media_bynder_cdn_url'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Cloudfront CDN url'),
+        '#default_value' => variable_get('media_bynder_cdn_url', ''),
+        '#size' => 50,
+        '#description' => t('Optional cloudfront CDN url.'),
+        '#required' => FALSE
+    );
+
     return system_settings_form($form);
 }
 

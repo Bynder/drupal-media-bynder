@@ -86,7 +86,7 @@ function media_bynder_id_from_uri($uri) {
 function media_bynder_id_from_url($url) {
     $parts = explode('/', $url);
     foreach ($parts as $part_key => $part) {
-        if ($part == 'm') {
+        if ($part == 'l') {
             if (count($parts) >= ($part_key + 1)) {
                 return $parts[$part_key + 1];
             }
@@ -138,7 +138,7 @@ function validateIdHash($str) {
 
 function media_bynder_uri_parse_style_url($uri) {
     $idHash = media_bynder_idHash_from_uri($uri);
-    return variable_get('media_bynder_url', '')  .  '/m/' .  $idHash . '/original/';
+    return variable_get('media_bynder_url', '')  .  '/l/' .  $idHash . '/original/';
 }
 
 function validateBynderDrupalUrl($str) {
@@ -150,6 +150,7 @@ function validateBynderDrupalUrl($str) {
     }
 }
 
+
 function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
     if (isset($file['idHash'])) {
         $idHash = $file['idHash'];
@@ -159,7 +160,12 @@ function customResolutionUrl($file, $width, $height, $effect, $prefix=FALSE) {
     if (!$prefix) {
         $prefix = 'drupal_custom';
     }
-    $url = variable_get('media_bynder_cdn_url', variable_get('media_bynder_url', '')) . '/additional/';
+
+    $bynder_url = variable_get('media_bynder_cdn_url', false);
+    if(!$bynder_url) {
+        $bynder_url = variable_get('media_bynder_url', '');
+    }
+    $url =  $bynder_url . '/additional/';
     $effect = str_replace('bynder_custom_resolution_', '', $effect);
     if ($effect == 'resize') {
         return $url . $prefix . '/media/' . $idHash . '?w=' . $width . '&h=' . $height;

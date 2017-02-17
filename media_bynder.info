@@ -6,6 +6,7 @@ core = 7.x
 dependencies[] = media_internet
 dependencies[] = oauth_common
 
+files[] = includes/autoload.php
 files[] = includes/BynderRestClient.inc
 files[] = includes/MediaBynderBrowser.inc
 files[] = includes/MediaBynderStreamWrapper.inc

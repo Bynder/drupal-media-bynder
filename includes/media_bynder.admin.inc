@@ -13,6 +13,7 @@ include_once 'BynderRestClient.inc';
  * Create a form to add media from Bynder.
  */
 function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
+
     module_load_include('inc', 'media', 'includes/media.browser');
     $form['#attached']['library'][] = array('media_bynder', 'media_bynder_administration');
     $form['#attached']['css'][] = array(
@@ -21,8 +22,10 @@ function media_bynder_add($form, &$form_state = array(), $redirect = NULL) {
     );
     drupal_process_attached($form);
 
-    $rest_client = media_bynder_rest_client();
-    $current_results = $rest_client->getAll()['media'];
+    $bynderApi = media_bynder_init_api();
+    $assetBank = $bynderApi->getAssetBankManager();
+    $current_results = $assetBank->getMediaList()->wait();
+
     variable_set('all_results', $current_results);
 
     $id = media_bynder_parameter($_POST, 'id');
@@ -96,8 +99,9 @@ function media_bynder_generate_search($state) {
 
     $data = array('#type' => 'fieldset');
 
-    $rest_client = media_bynder_rest_client();
-    $meta_properties = $rest_client->getMetaProperties();
+    $bynderApi = media_bynder_init_api();
+    $assetBank = $bynderApi->getAssetBankManager();
+    $meta_properties = $assetBank->getMetaProperties()->wait();
 
     $filter_labels = array(
         'brandId' => t('Brands'),
@@ -251,25 +255,26 @@ function media_bynder_selected_facets($filters) {
  * Search with selected facets and a search term.
  */
 function media_bynder_search_facets($selected_facets, $search_term) {
-    $full_query = "";
+    $query = array();
     foreach ($selected_facets as $selected_facet_group_name => $selected_facet_group) {
-        $full_query .= "&" . $selected_facet_group_name . '=' . implode(",", $selected_facet_group);
+        $query[$selected_facet_group_name] = implode(",", $selected_facet_group);
     }
 
-    if (isset($search_term) && strlen($search_term) > 0) {
-        if (strlen($full_query) > 0) {
-            $full_query .= ' ';
-        }
-        $full_query .= '&keyword=' . $search_term;
+    if (isset($search) && strlen($search) > 0) {
+        $query['keyword'] = urlencode($search_term);
     }
+    $query['count'] = 1;
 
-    $rest_client = media_bynder_rest_client();
-    $arr_facets_json = $rest_client->getFacets($full_query);
+    $bynderApi = media_bynder_init_api();
+    $assetBank = $bynderApi->getAssetBankManager();
+    $assets = $assetBank->getMediaList($query)->wait();
+
+    $arr_facets_json = $assets['count'];
 
     if ($arr_facets_json) {
         return $arr_facets_json;
     } else {
-        drupal_set_message($rest_client->error, 'error');
+        drupal_set_message("Error fetching media", 'error');
         return FALSE;
     }
 }
@@ -506,15 +511,17 @@ function media_bynder_remove_hidden_facets($available_facets, $selected_facets) 
  * Get brands.
  */
 function media_bynder_brands() {
-    $rest_client = media_bynder_rest_client();
-    $result = $rest_client->brands();
-    $arr_json = [];
 
-    if ($result) {
-        $arr_json = json_decode($result, TRUE);
-    } else {
-        drupal_set_message(t('Could not retrieve search results:') . filter_xss($rest_client->error), 'error');
-    }
+    $bynderApi = media_bynder_init_api();
+    $assetBank = $bynderApi->getAssetBankManager();
+    $result = $assetBank->getBrands()->wait();
+    $arr_json = $result;
+
+//    if ($result) {
+//        $arr_json = json_decode($result, TRUE);
+//    } else {
+//        drupal_set_message(t('Could not retrieve search results:') . filter_xss($result->error), 'error');
+//    }
 
     return $arr_json;
 }
@@ -533,7 +540,7 @@ function media_bynder_brands() {
 function media_bynder_search_results($search, $selected_facets, $meta_properties) {
     $start_index = 0;
     $nr_of_results = 25;
-    $query = '';
+    $query = array();
 
     if (isset($_GET['page'])) {
         $current_page = (int) filter_xss($_GET['page']);
@@ -556,29 +563,43 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
                 foreach(explode(',', $facets[0]) as $facet){
                     $meta_facets[] = $selected_facets_meta_properties[$facet_category][$facet];
                 }
-                $query .= '&propertyOptionId=' . implode(',', $meta_facets);
+                $query['propertyOptionId'] =  implode(',', $meta_facets);
             }else{
-                $query .= '&' . $facet_category . '=' . $facets;
+                $query[$facet_category] = $facets;
             }
         }
     }
 
     if (isset($search) && strlen($search) > 0) {
-        $query .= '&keyword='.urlencode($search);
+        $query['keyword'] = urlencode($search);
     }
-    $rest_client = media_bynder_rest_client();
-    $result = $rest_client->search($query, $start_index, $nr_of_results);
 
-    if ($result) {
-        $arr_json = json_decode($result, TRUE);
-        if (isset($arr_json['count']['total'])) {
-            $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
-        }
-    } else {
-        drupal_set_message(t('Could not retrieve search results:') . filter_xss($rest_client->error), 'error');
-        return false;
+    $bynderApi = media_bynder_init_api();
+    $assetBank = $bynderApi->getAssetBankManager();
+
+    $page = 1;
+    if (isset($start_index) && $start_index > 0) {
+        $page = $start_index/$nr_of_results;
     }
-    return $arr_json;
+    $query = $query + array(
+        'page' => $page,
+        'limit' => $nr_of_results,
+        'count' => 1
+    );
+
+    $result = $assetBank->getMediaList($query)->wait();
+//
+//    if ($result) {
+//        $arr_json = json_decode($result, TRUE);
+//        if (isset($arr_json['count']['total'])) {
+//            $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
+//        }
+//    } else {
+//        drupal_set_message(t('Could not retrieve search results:') . filter_xss($rest_client->error), 'error');
+//        return false;
+//    }
+    $result['totalNrOfResults'] = $result['count']['total'];
+    return $result;
 }
 
 /**

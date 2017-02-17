@@ -5,22 +5,29 @@
  * utility functions for the media_bynder module
  */
 
+include_once 'autoload.php';
+use \Bynder\Api\BynderApiFactory;
+
 /**
  * Initialize the Bynder REST client.
  */
-function media_bynder_rest_client() {
-    return new BynderRestClient(
-      variable_get('media_bynder_url', '') . '/api/v4',
-      variable_get('media_bynder_oauth_consumer', ''),
-      variable_get('media_bynder_oauth_consumer_secret', ''),
-      variable_get('media_bynder_oauth_token', ''),
-      variable_get('media_bynder_oauth_token_secret', '')
+function media_bynder_init_api() {
+
+    $settings = array(
+        'consumerKey' => variable_get('media_bynder_oauth_consumer', ''),
+        'consumerSecret' => variable_get('media_bynder_oauth_consumer_secret', ''),
+        'token' => variable_get('media_bynder_oauth_token', ''),
+        'tokenSecret' => variable_get('media_bynder_oauth_token_secret', ''),
+        'baseUrl' => variable_get('media_bynder_url', '')
     );
+    return BynderApiFactory::create($settings);
 }
 
 function media_bynder_get_object_by_id($id) {
-    $rest_client = media_bynder_rest_client();
-    return json_decode($rest_client->getMediaObject($id), TRUE);
+
+    $bynderApi = media_bynder_init_api();
+    $assetBank = $bynderApi->getAssetBankManager();
+    return json_decode($assetBank->getMediaInfo($id), TRUE);
 }
 
 /**

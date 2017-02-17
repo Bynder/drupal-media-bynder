@@ -1,5 +1,17 @@
 {
     "name": "bynder/drupal-media-bynder",
     "type": "drupal-module",
-    "description": "A Drupal module to integrate Bynder with the Media module"
+    "description": "A Drupal module to integrate Bynder with the Media module",
+    "config": {
+      "vendor-dir": "includes"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git@github.com:Bynder/bynder-php-sdk.git"
+        }
+    ],
+    "require": {
+        "Bynder/bynder-php-sdk": "dev-develop"
+    }
 }

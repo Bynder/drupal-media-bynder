@@ -27,7 +27,7 @@ function media_bynder_get_object_by_id($id) {
 
     $bynderApi = media_bynder_init_api();
     $assetBank = $bynderApi->getAssetBankManager();
-    return json_decode($assetBank->getMediaInfo($id), TRUE);
+    return $assetBank->getMediaInfo($id)->wait();
 }
 
 /**
@@ -41,24 +41,33 @@ function media_bynder_get_object_by_id($id) {
 
 function media_bynder_embed_url($fragment_id, $type=FALSE, $effects=FALSE, $idHash=FALSE) {
     $url = '';
+    $error = false;
      if (!$type) {
         $type = 'bynder_custom';
     }
+    try {
+        if(isset($fragment_id) && !$idHash) {
+            $media_item = media_bynder_get_object_by_id($fragment_id);
+        } else {
+            $media_item = ['idHash' => $fragment_id];
+        }
 
-    if(isset($fragment_id) && !$idHash) {
-        $media_item = media_bynder_get_object_by_id($fragment_id);
-    } else {
-        $media_item = ['idHash' => $fragment_id];
+        if ($effects) {
+            $url = customResolutionUrl($media_item, $effects['data']['width'], $effects['data']['height'], $effects['name']);
+        } else if (isset($media_item['thumbnails'][$type])) {
+            $url = $media_item['thumbnails'][$type];
+        }
+        if (!$url) {
+            //fallback image
+            $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
+        }
     }
-
-    if ($effects) {
-        $url = customResolutionUrl($media_item, $effects['data']['width'], $effects['data']['height'], $effects['name']);
-    } else if (isset($media_item['thumbnails'][$type])) {
-        $url = $media_item['thumbnails'][$type];
+    catch (Exception $e) {
+        watchdog('php',$e->getMessage());
+        $error = true;
     }
-    if (!$url) {
-        //fallback image
-        $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
+    if(!$url || $error) {
+         $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
     }
     return $url;
 }

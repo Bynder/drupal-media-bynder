@@ -22,9 +22,9 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
     }
 
     /**
-     * Function getOriginalThumbnailPath().
+     * Function getWebimagePath().
      * @return string
-     *   The path to the thumbnail.
+     *   The path to the image.
      */
     public function getWebimagePath($type=FALSE, $effects=FALSE, $idHash=FALSE) {
         return @media_bynder_embed_url($this->parameters['f'], $type, $effects, $idHash);

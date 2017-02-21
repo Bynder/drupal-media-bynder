@@ -7,8 +7,6 @@
  * Callback for /admin/configure/media/media_bynder.
  */
 
-include_once 'BynderRestClient.inc';
-
 /**
  * Create a form to add media from Bynder.
  */

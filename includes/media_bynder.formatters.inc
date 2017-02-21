@@ -10,7 +10,8 @@
  * Implements hook_file_formatter_info().
  * $info: Array of information on file formatters exposed by hook_file_formatter_info() implementations.
  */
-function media_bynder_file_formatter_info_alter(&$info) {
+function media_bynder_file_formatter_info_alter(&$info)
+{
     $info['file_image'] = array(
         'label' => t('Bynder Preview Image'),
         'file types' => array(
@@ -32,15 +33,16 @@ function media_bynder_file_formatter_info_alter(&$info) {
 /**
  * Format image view.
  */
-function media_bynder_file_formatter_image_view($file, $display, $langcode) {
+function media_bynder_file_formatter_image_view($file, $display, $langcode)
+{
     $scheme = file_uri_scheme($file->uri);
 
     if ($scheme == 'bynder') {
         $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
         $image_style = $display['settings']['image_style'];
-        $valid_image_styles = image_style_options(FALSE);
+        $valid_image_styles = image_style_options(false);
 
-        $effect = $type = $idHash = FALSE;
+        $effect = $type = $idHash = false;
         $effects = image_styles()[$image_style];
 
         foreach ($effects as $effect) {
@@ -69,20 +71,22 @@ function media_bynder_file_formatter_image_view($file, $display, $langcode) {
 /**
  * Implements hook_file_formatter_FORMATTER_settings().
  */
-function media_bynder_file_formatter_image_settings($form, &$form_state, $settings) {
+function media_bynder_file_formatter_image_settings($form, &$form_state, $settings)
+{
     $element = array();
     $element['image_style'] = array(
         '#title' => t('Image style'),
         '#type' => 'select',
-        '#options' => image_style_options(FALSE),
+        '#options' => image_style_options(false),
         '#default_value' => $settings['image_style'],
         '#empty_option' => t('None (original image)')
     );
     return $element;
 }
 
-function media_bynder_field_info_alter(&$info) {
-   $info['image']['default widget'] = 'media_bynder';
+function media_bynder_field_info_alter(&$info)
+{
+    $info['image']['default widget'] = 'media_bynder';
 }
 
 /**
@@ -90,7 +94,8 @@ function media_bynder_field_info_alter(&$info) {
  * Add an example image style for drupal-media-bynder
  */
 
-function media_bynder_image_default_styles() {
+function media_bynder_image_default_styles()
+{
     variable_set('image_style_preview_image', drupal_get_path('module', 'image') . '/sample.png');
     $styles = array();
 
@@ -114,29 +119,30 @@ function media_bynder_image_default_styles() {
  * Implements hook_image_effect_info().
  * declare effect callbacks
  */
-function media_bynder_image_effect_info() {
+function media_bynder_image_effect_info()
+{
     return array(
         'bynder_custom_resolution_crop' => array(
             'label' => t('Bynder custom resolution crop'),
             'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
-            'effect callback'=> 'media_bynder_custom_resolution_effect',
+            'effect callback' => 'media_bynder_custom_resolution_effect',
             'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
-            'form callback'=> 'image_resize_form',
+            'form callback' => 'image_resize_form',
         ),
         'bynder_custom_resolution_extend' => array(
             'label' => t('Bynder custom resolution extend'),
             'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
-            'effect callback'=> 'media_bynder_custom_resolution_effect',
+            'effect callback' => 'media_bynder_custom_resolution_effect',
             'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
-            'form callback'=> 'image_resize_form',
+            'form callback' => 'image_resize_form',
         ),
         'bynder_custom_resolution_resize' => array(
             'label' => t('Bynder custom resolution resize'),
-             'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
-             'effect callback'=> 'media_bynder_custom_resolution_effect',
-             'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
-             'form callback'=> 'image_resize_form',
-         )
+            'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
+            'effect callback' => 'media_bynder_custom_resolution_effect',
+            'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
+            'form callback' => 'image_resize_form',
+        )
     );
 }
 
@@ -144,22 +150,27 @@ function media_bynder_image_effect_info() {
  * Implements callback 'effect callback'
  * will return the image from the API, instead of modifying the image as intended
  */
-function media_bynder_custom_resolution_effect(&$image, $data) {
+function media_bynder_custom_resolution_effect(&$image, $data)
+{
     if (!media_bynder_custom_resolution($image)) {
-        watchdog('image', 'The image %file could not be colorize because the imagefilter() function is not available in this PHP installation.', array('%file' => $image->source), WATCHDOG_ERROR);
-        return FALSE;
+        watchdog('image',
+            'The image %file could not be colorize because the imagefilter() function is not available in this PHP installation.',
+            array('%file' => $image->source), WATCHDOG_ERROR);
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 /**
  * Filter effect function
  */
-function media_bynder_custom_resolution(stdClass $image) {
+function media_bynder_custom_resolution(stdClass $image)
+{
     return imagefilter($image->resource, null);
 }
 
-function media_bynder_custom_resolution_dimensions(array &$dimensions, array $data) {
+function media_bynder_custom_resolution_dimensions(array &$dimensions, array $data)
+{
     if ($dimensions['width'] && $dimensions['height']) {
         $dimensions['width'] = $data['width'];
         $dimensions['height'] = $data['height'];
@@ -170,13 +181,14 @@ function media_bynder_custom_resolution_dimensions(array &$dimensions, array $da
  * Implements hook_preprocess_image()
  * Will edit the Path to match the API call if the bynder_custom_resolution effect is present in the active style
  */
-function media_bynder_preprocess_image(&$vars) {
+function media_bynder_preprocess_image(&$vars)
+{
     if (array_key_exists('uri', $vars)) {
         $vars['path'] = $vars['uri'];
     }
 
     if (!isset($vars['style_name'])) {
-        return FALSE;
+        return false;
     }
 
     $image_styles = image_styles();
@@ -184,27 +196,29 @@ function media_bynder_preprocess_image(&$vars) {
     if (isset($image_styles[$vars['style_name']])) {
         $image_style = $image_styles[$vars['style_name']];
         foreach ($image_style['effects'] as $effect_key => $effect) {
-            if (strpos($vars['path'], variable_get('media_bynder_url')) !== FALSE && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')) {
+            if (strpos($vars['path'],
+                    variable_get('media_bynder_url')) !== false && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')
+            ) {
                 $fragment_id = media_bynder_id_from_uri($vars['path']);
                 if ($fragment_id) {
-                    $vars['path'] = media_bynder_embed_url($fragment_id, FALSE, $effect);
-                }
-                else {
+                    $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
+                } else {
                     $fragment_id = media_bynder_id_from_url($vars['path']);
-                    $vars['path'] = media_bynder_embed_url($fragment_id, FALSE, $effect, TRUE);
+                    $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
                 }
-              break;
+                break;
             }
         }
     }
-    return FALSE;
+    return false;
 }
 
 /**
  * Implements hook_preprocess_image_style().
  * Change the URI of the image to the real URL
  */
-function media_bynder_preprocess_image_style(&$variables) {
+function media_bynder_preprocess_image_style(&$variables)
+{
     if (array_key_exists('uri', $variables) && file_uri_scheme($variables['uri']) == 'bynder') {
         $variables['uri'] = $variables['path'];
     }
@@ -214,7 +228,8 @@ function media_bynder_preprocess_image_style(&$variables) {
  * Implements hook_field_formatter_info().
  * Add a new formatter for field type "image"
  */
-function media_bynder_field_formatter_info() {
+function media_bynder_field_formatter_info()
+{
     return array(
         'media_bynder_absolute_url' => array(
             'label' => t('Absolute URL'),
@@ -231,7 +246,8 @@ function media_bynder_field_formatter_info() {
 /**
  * Implements hook_field_formatter_settings_form().
  */
-function media_bynder_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+function media_bynder_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state)
+{
     $settings = $instance['display'][$view_mode]['settings'];
     $options = array();
 
@@ -256,7 +272,8 @@ function media_bynder_field_formatter_settings_form($field, $instance, $view_mod
  * Implements hook_field_formatter_settings_summary.
  * The summary for the "manage display view"
  */
-function media_bynder_field_formatter_settings_summary($field, $instance, $view_mode) {
+function media_bynder_field_formatter_settings_summary($field, $instance, $view_mode)
+{
     $display = $instance['display'][$view_mode];
     $settings = $display['settings'];
     $summary = t('Return the absolute URL with <b> @style </b> Image Style',
@@ -270,7 +287,8 @@ function media_bynder_field_formatter_settings_summary($field, $instance, $view_
  * Implements hook_field_formatter_view().
  * Returns the absolute URL for the custom calls
  */
-function media_bynder_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+function media_bynder_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display)
+{
     if ($display['type'] == 'media_bynder_absolute_url') {
         $settings = $display['settings'];
         //global Drupal function
@@ -302,5 +320,5 @@ function media_bynder_field_formatter_view($entity_type, $entity, $field, $insta
             }
         }
     }
-    return FALSE;
+    return false;
 }

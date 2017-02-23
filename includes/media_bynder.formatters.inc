@@ -41,17 +41,17 @@ function media_bynder_file_formatter_image_view($file, $display, $langcode)
         $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
         $image_style = $display['settings']['image_style'];
         $valid_image_styles = image_style_options(false);
-
         $effect = $type = $idHash = false;
-        $effects = image_styles()[$image_style];
+        if($image_style) {
+            $effects = image_styles()[$image_style];
+            foreach ($effects as $effect) {
+                if (is_array($effect)) {
+                    //array is not 0-based
+                    $effect = reset($effect);
 
-        foreach ($effects as $effect) {
-            if (is_array($effect)) {
-                //array is not 0-based
-                $effect = reset($effect);
-
-                if (strpos($effect['name'], 'bynder') !== false) {
-                    break;
+                    if (strpos($effect['name'], 'bynder') !== false) {
+                        break;
+                    }
                 }
             }
         }
@@ -63,7 +63,6 @@ function media_bynder_file_formatter_image_view($file, $display, $langcode)
             '#alt' => isset($file->override['attributes']['alt']) ? $file->override['attributes']['alt'] : $file->filename,
             '#suffix' => '<p class="media_object_type_' . ucfirst($file->type) . '">' . ucfirst($file->type) . '</p>'
         );
-
         return $element;
     }
 }

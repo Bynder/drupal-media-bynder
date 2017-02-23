@@ -3,11 +3,9 @@ description = Integrates Bynder media files with Media.
 package = "Media"
 core = 7.x
 
+dependencies[] = composer_manager
 dependencies[] = media_internet
-dependencies[] = oauth_common
 
-files[] = includes/autoload.php
-files[] = includes/BynderRestClient.inc
 files[] = includes/MediaBynderBrowser.inc
 files[] = includes/MediaBynderStreamWrapper.inc
 scripts[] = js/image.js

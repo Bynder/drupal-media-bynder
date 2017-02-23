@@ -133,7 +133,7 @@ function media_bynder_generate_search($state)
         }
     }
 
-    $selected_facets = media_bynder_selected_facets($filters);
+    $selected_facets = media_bynder_selected_facets($state);
     $results = media_bynder_search_results($search, $filters, $meta_properties);
     $available_facets = $results['count'];
 
@@ -236,7 +236,7 @@ function media_bynder_filters_json($state)
 /**
  * Return selected facets.
  */
-function media_bynder_selected_facets($filters)
+function media_bynder_selected_facets($state)
 {
     $selected_facets = array();
 
@@ -535,15 +535,12 @@ function media_bynder_brands()
     $bynderApi = media_bynder_init_api();
     $assetBank = $bynderApi->getAssetBankManager();
     $result = $assetBank->getBrands()->wait();
-    $arr_json = $result;
 
-//    if ($result) {
-//        $arr_json = json_decode($result, TRUE);
-//    } else {
-//        drupal_set_message(t('Could not retrieve search results:') . filter_xss($result->error), 'error');
-//    }
-
-    return $arr_json;
+    if ($result) {
+        return $result;
+    } else {
+        drupal_set_message(t('Could not retrieve search results:') . filter_xss($result->error), 'error');
+    }
 }
 
 /**
@@ -609,17 +606,15 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
         );
 
     $result = $assetBank->getMediaList($query)->wait();
-//
-//    if ($result) {
-//        $arr_json = json_decode($result, TRUE);
-//        if (isset($arr_json['count']['total'])) {
-//            $arr_json['totalNrOfResults'] = $arr_json['count']['total'];
-//        }
-//    } else {
-//        drupal_set_message(t('Could not retrieve search results:') . filter_xss($rest_client->error), 'error');
-//        return false;
-//    }
-    $result['totalNrOfResults'] = $result['count']['total'];
+
+    if ($result) {
+        if (isset($result['count']['total'])) {
+            $result['totalNrOfResults'] = $result['count']['total'];
+        }
+    } else {
+        drupal_set_message(t('Could not retrieve search results:') . filter_xss($result->error), 'error');
+        return false;
+    }
     return $result;
 }
 

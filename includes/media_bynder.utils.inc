@@ -5,7 +5,6 @@
  * utility functions for the media_bynder module
  */
 
-include_once 'autoload.php';
 use \Bynder\Api\BynderApiFactory;
 
 /**

@@ -95,16 +95,13 @@ function media_bynder_form($form, &$form_state)
 //            '#default_value' => TRUE,
 //        ],
 //    ];
-
-
-
     $form['media_bynder_settings']['media_bynder_derivatives'] = [
         '#type' => 'fieldset',
         '#title' => t('Bynder image derivatives'),
         '#description' => t('Bynder provides "mini", "webimage" and "thul" image sizes by default. Custom derivatives can be configured to better suit specific use-cases. Reload of derivatives can be triggered if any derivatives are missing from the list.'),
         'derivatives_list' => [
             '#theme' => 'item_list',
-            '#items' => unserialize(variable_get('media_bynder_derivatives','')),
+            '#items' => unserialize(variable_get('media_bynder_derivatives', '')),
         ],
         'check' => [
             '#type' => 'submit',
@@ -135,6 +132,7 @@ function media_bynder_batch_reload_derivatives()
         'operations' => array(
             array('media_bynder_get_media_list', array()),
             array('media_bynder_batch_reload_derivatives_process', array()),
+            array('media_bynder_batch_clean_image_styles', array()),
         ),
         'finished' => 'media_bynder_batch_reload_derivatives_finished',
         'title' => t('Batch to reload Bynder derivatives information'),
@@ -145,12 +143,13 @@ function media_bynder_batch_reload_derivatives()
     batch_set($batch);
 }
 
-function media_bynder_get_media_list(&$context) {
+function media_bynder_get_media_list(&$context)
+{
     $context['message'] = "Fetching Media List.";
     $bynderApi = media_bynder_init_api();
     $mediaList = $bynderApi->getAssetBankManager()->getMediaList(array('limit' => 1))->wait();
     $derivatives = array_keys($mediaList[0]['thumbnails']);
-    variable_set('media_bynder_derivatives', serialize($derivatives));
+    $context['results']['oldDerivatives'] = unserialize(variable_get('media_bynder_derivatives', array()));
     $context['results']['derivativesList'] = $derivatives;
 }
 
@@ -161,30 +160,47 @@ function media_bynder_batch_reload_derivatives_process(&$context)
 {
     $context['message'] = "Updating derivatives data.";
     $derivatives = $context['results']['derivativesList'];
-    $customDerivative =  variable_get('media_bynder_custom_derivative');
-    foreach ($derivatives as $derivative) {
-        if(!image_style_load('bynder_' . $derivative)) {
-            $context['message'] = "Creating image style for derivative: $derivative";
-            $style = image_style_save(
-                array(
-                    'name' => 'bynder_' . $derivative,
-                    'label' => t('Bynder derivative: ' . $derivative)
-                )
-            );
+    $oldDerivatives = $context['results']['oldDerivatives'];
+    $newDerivatives = array_diff((array)$derivatives, (array)$oldDerivatives);
+    $toStore = array_intersect((array)$derivatives, (array)$oldDerivatives);
 
-            if($derivative == $customDerivative) {
-                $effect = array(
-                    'name' => 'bynder_custom_resolution_resize',
-                    'data' => array(
-                        'width' => 400,
-                        'height' => 400
-                    ),
-                    'isid' => $style['isid'],
+    $context['results']['toRemove'] = array_diff((array)$oldDerivatives, (array)$derivatives);
+
+    if (!empty($newDerivatives)) {
+        $customDerivative = variable_get('media_bynder_custom_derivative');
+        foreach ($newDerivatives as $derivative) {
+            if (!image_style_load('bynder_' . $derivative)) {
+                $context['message'] = "Creating image style for derivative: $derivative";
+                $style = image_style_save(
+                    array(
+                        'name' => 'bynder_' . $derivative,
+                        'label' => t('Bynder derivative: ' . $derivative)
+                    )
                 );
-                image_effect_save($effect);
+
+                if ($derivative == $customDerivative) {
+                    $effect = array(
+                        'name' => 'bynder_custom_resolution_resize',
+                        'data' => array(
+                            'width' => 400,
+                            'height' => 400
+                        ),
+                        'isid' => $style['isid'],
+                    );
+                    image_effect_save($effect);
+                }
             }
         }
     }
+    variable_set('media_bynder_derivatives', serialize($toStore));
+}
+
+function media_bynder_batch_clean_image_styles(&$context)
+{
+    foreach ($context['results']['toRemove'] as $name) {
+        image_style_delete("bynder_$name", 'thumbnail');
+    }
+
 }
 
 /**

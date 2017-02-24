@@ -41,7 +41,6 @@ function media_bynder_file_formatter_image_view($file, $display, $langcode)
         $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
         $image_style = $display['settings']['image_style'];
         $valid_image_styles = image_style_options(false);
-//        var_dump($valid_image_styles);die;
         $effect = $type = $idHash = false;
         if($image_style) {
             $effects = image_styles()[$image_style];
@@ -169,24 +168,27 @@ function media_bynder_preprocess_image(&$vars)
     if (!isset($vars['style_name'])) {
         return false;
     }
-
     $image_styles = image_styles();
-
     if (isset($image_styles[$vars['style_name']])) {
         $image_style = $image_styles[$vars['style_name']];
-        foreach ($image_style['effects'] as $effect_key => $effect) {
-            if (strpos($vars['path'],
-                    variable_get('media_bynder_url')) !== false && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')
-            ) {
-                $fragment_id = media_bynder_id_from_uri($vars['path']);
-                if ($fragment_id) {
-                    $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
-                } else {
-                    $fragment_id = media_bynder_id_from_url($vars['path']);
-                    $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
+        if(!empty($image_style['effects'])) {
+            foreach ($image_style['effects'] as $effect_key => $effect) {
+                if (strpos($vars['path'],
+                        variable_get('media_bynder_url')) !== false && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')
+                ) {
+                    $fragment_id = media_bynder_id_from_uri($vars['path']);
+                    if ($fragment_id) {
+                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
+                    } else {
+                        $fragment_id = media_bynder_id_from_url($vars['path']);
+                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
+                    }
+                    break;
                 }
-                break;
             }
+        }
+        else {
+// TODO implement regular derivatives
         }
     }
     return false;

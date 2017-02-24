@@ -5,7 +5,7 @@
  * Manages the Bynder media browser functionality
  */
 
-const BYNDER_SEARCH_PAGE_SIZE = 5;
+const BYNDER_SEARCH_PAGE_SIZE = 10;
 
 /**
  * Create a form to add media from Bynder.
@@ -553,6 +553,7 @@ function media_bynder_search_results($search, $selected_facets, $meta_properties
 
     if (isset($_GET['page'])) {
         $current_page = (int)filter_xss($_GET['page']);
+        $current_page += 1;
         $start_index = $current_page * $nr_of_results;
     }
     $selected_facets_meta_properties = [];
@@ -682,13 +683,12 @@ function media_bynder_generate_pager($num_results, $element = 0, $parameters = a
     if (isset($_POST['search'])) {
         $_GET['search'] = filter_xss(check_plain($_POST['search']));
     }
-
     pager_default_initialize($num_results, BYNDER_SEARCH_PAGE_SIZE, $element);
     return array(
         '#markup' => theme('pager', array(
             'parameters' => $parameters,
-            'element' => $element
-        ))
+            'element' => $element,
+         ))
     );
 }
 

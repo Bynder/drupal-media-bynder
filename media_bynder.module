@@ -10,7 +10,6 @@ require_once dirname(__FILE__) . '/includes/media_bynder.utils.inc';
 
 // Hooks and callbacks for integrating with File Entity module for display.
 require_once dirname(__FILE__) . '/includes/media_bynder.formatters.inc';
-
 require_once dirname(__FILE__) . '/includes/media_bynder.admin.inc';
 
 /**

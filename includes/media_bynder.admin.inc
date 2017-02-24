@@ -113,38 +113,28 @@ function media_bynder_form($form, &$form_state)
         ],
     ];
 
+    $form['media_bynder_settings']['media_bynder_derivatives']['media_bynder_custom_derivative'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Custom derivative name'),
+        '#default_value' => variable_get('media_bynder_custom_derivative', 'drupal_custom'),
+        '#size' => 50,
+        '#description' => t('Custom derivative name set up in Bynder config, allows cropping and resizing.'),
+        '#required' => false
+    );
+
     return system_settings_form($form);
 }
-
-/**
- * Submit callback that will initiate derivaties reload batch.
- */
-//function media_bynder_submit_reload_derivatives(array &$form, FormStateInterface $form_state) {
-//    $batch = [
-//        'title' => t('Reloading derivatives information'),
-//        'operations' => [
-//            ['media_bynder_batch_get_brands'],
-//            ['media_bynder_batch_reload_derivatives'],
-//        ],
-//        'finished' => ['media_bynder_batch_finish'],
-//    ];
-//    batch_set($batch);
-//}
 
 /**
  * The batch callback.
  */
 function media_bynder_batch_reload_derivatives()
 {
-
-    $bynderApi = media_bynder_init_api();
-
-    $mediaList = $bynderApi->getAssetBankManager()->getMediaList(array('limit' => 1))->wait();
-    $derivativesList = array($mediaList[0]['thumbnails']);
-
+    variable_set('image_style_preview_image', drupal_get_path('module', 'image') . '/sample.png');
     $batch = array(
         'operations' => array(
-            array('media_bynder_batch_reload_derivatives_process', $derivativesList),
+            array('media_bynder_get_media_list', array()),
+            array('media_bynder_batch_reload_derivatives_process', array()),
         ),
         'finished' => 'media_bynder_batch_reload_derivatives_finished',
         'title' => t('Batch to reload Bynder derivatives information'),
@@ -155,14 +145,46 @@ function media_bynder_batch_reload_derivatives()
     batch_set($batch);
 }
 
+function media_bynder_get_media_list(&$context) {
+    $context['message'] = "Fetching Media List.";
+    $bynderApi = media_bynder_init_api();
+    $mediaList = $bynderApi->getAssetBankManager()->getMediaList(array('limit' => 1))->wait();
+    $derivatives = array_keys($mediaList[0]['thumbnails']);
+    variable_set('media_bynder_derivatives', serialize($derivatives));
+    $context['results']['derivativesList'] = $derivatives;
+}
+
 /**
  * The batch processor.
  */
-function media_bynder_batch_reload_derivatives_process($derivativesList, &$context)
+function media_bynder_batch_reload_derivatives_process(&$context)
 {
-    $derivativeNames = array_keys($derivativesList);
-    variable_set('media_bynder_derivatives', serialize($derivativeNames));
     $context['message'] = "Updating derivatives data.";
+    $derivatives = $context['results']['derivativesList'];
+    $customDerivative =  variable_get('media_bynder_custom_derivative');
+    foreach ($derivatives as $derivative) {
+        if(!image_style_load('bynder_' . $derivative)) {
+            $context['message'] = "Creating image style for derivative: $derivative";
+            $style = image_style_save(
+                array(
+                    'name' => 'bynder_' . $derivative,
+                    'label' => t('Bynder derivative: ' . $derivative)
+                )
+            );
+
+            if($derivative == $customDerivative) {
+                $effect = array(
+                    'name' => 'bynder_custom_resolution_resize',
+                    'data' => array(
+                        'width' => 400,
+                        'height' => 400
+                    ),
+                    'isid' => $style['isid'],
+                );
+                image_effect_save($effect);
+            }
+        }
+    }
 }
 
 /**
@@ -171,7 +193,7 @@ function media_bynder_batch_reload_derivatives_process($derivativesList, &$conte
 function media_bynder_batch_reload_derivatives_finished($success, $results, $operations)
 {
     if ($success) {
-        drupal_set_message('Fix is complete!');
+        drupal_set_message('Finished setting up image styles!');
     } else {
         $error_operation = reset($operations);
         $message = t('An error occurred while processing %error_operation with arguments: @arguments', array(

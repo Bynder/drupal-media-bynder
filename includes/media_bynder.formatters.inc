@@ -41,6 +41,7 @@ function media_bynder_file_formatter_image_view($file, $display, $langcode)
         $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
         $image_style = $display['settings']['image_style'];
         $valid_image_styles = image_style_options(false);
+//        var_dump($valid_image_styles);die;
         $effect = $type = $idHash = false;
         if($image_style) {
             $effects = image_styles()[$image_style];
@@ -89,60 +90,39 @@ function media_bynder_field_info_alter(&$info)
 }
 
 /**
- * Implements hook_image_default_styles().
- * Add an example image style for drupal-media-bynder
- */
-
-function media_bynder_image_default_styles()
-{
-    variable_set('image_style_preview_image', drupal_get_path('module', 'image') . '/sample.png');
-    $styles = array();
-
-    $styles['bynder_drupal_example'] = array(
-        'label' => t('Bynder Example (400x400)'),
-        'effects' => array(
-            array(
-                'name' => 'bynder_custom_resolution_resize',
-                'data' => array(
-                    'width' => 400,
-                    'height' => 400
-                ),
-                'weight' => 0,
-            ),
-        ),
-    );
-    return $styles;
-}
-
-/**
  * Implements hook_image_effect_info().
  * declare effect callbacks
  */
 function media_bynder_image_effect_info()
 {
-    return array(
-        'bynder_custom_resolution_crop' => array(
-            'label' => t('Bynder custom resolution crop'),
-            'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
-            'effect callback' => 'media_bynder_custom_resolution_effect',
-            'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
-            'form callback' => 'image_resize_form',
-        ),
-        'bynder_custom_resolution_extend' => array(
-            'label' => t('Bynder custom resolution extend'),
-            'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
-            'effect callback' => 'media_bynder_custom_resolution_effect',
-            'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
-            'form callback' => 'image_resize_form',
-        ),
-        'bynder_custom_resolution_resize' => array(
-            'label' => t('Bynder custom resolution resize'),
-            'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
-            'effect callback' => 'media_bynder_custom_resolution_effect',
-            'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
-            'form callback' => 'image_resize_form',
-        )
-    );
+    $customDerivative =  variable_get('media_bynder_custom_derivative', null);
+    $effects = array();
+    if($customDerivative) {
+        $effects = array(
+            'bynder_custom_resolution_crop' => array(
+                'label' => t('Bynder custom resolution crop'),
+                'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
+                'effect callback' => 'media_bynder_custom_resolution_effect',
+                'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
+                'form callback' => 'image_resize_form',
+            ),
+            'bynder_custom_resolution_extend' => array(
+                'label' => t('Bynder custom resolution extend'),
+                'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
+                'effect callback' => 'media_bynder_custom_resolution_effect',
+                'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
+                'form callback' => 'image_resize_form',
+            ),
+            'bynder_custom_resolution_resize' => array(
+                'label' => t('Bynder custom resolution resize'),
+                'help' => t('Creates a call to the public Bynder function in /additional/, make sure this is properly configured or ask the Bynder support team.<br>Please note that in order for this function to work you need to call this effect only as it uses an external image from Bynder. Due to this external nature additional drupal effects can\'t be applied'),
+                'effect callback' => 'media_bynder_custom_resolution_effect',
+                'dimensions callback' => 'media_bynder_custom_resolution_dimensions',
+                'form callback' => 'image_resize_form',
+            )
+        );
+    }
+    return $effects;
 }
 
 /**

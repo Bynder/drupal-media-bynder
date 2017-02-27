@@ -6,12 +6,105 @@
  */
 
 /**
+ * Implements hook_install().
+ */
+function media_bynder_schema()
+{
+
+    $schema['bynder_media_entity'] = array(
+        'description' => 'Table to store Bynder media information.',
+        'fields' => array(
+            'id' => array(
+                'type' => 'serial',
+                'unsigned' => true,
+                'not null' => true,
+            ),
+            'bynder_id' => array(
+                'description' => 'Bynder asset unique identifier.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => true,
+                'default' => '',
+            ),
+            'bynder_hash_id' => array(
+                'description' => 'Bynder hash identifier.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => true,
+                'default' => '',
+            ),
+            'name' => array(
+                'description' => 'The title of the asset.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => true,
+                'default' => '',
+            ),
+            'description' => array(
+                'description' => 'The description of the asset.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => true,
+                'default' => '',
+            ),
+            'derivatives' => array(
+                'description' => 'Derivative information.',
+                'type' => 'text',
+                'not null' => FALSE,
+                'size' => 'big',
+                'serialize' => TRUE,
+            ),
+        ),
+        'primary key' => array('id'),
+    );
+
+    $schema['bynder_media_usage'] = array(
+        'description' => 'Associates stored Bynder assets with file and node ids.',
+        'fields' => array(
+            'id' => array(
+                'type' => 'serial',
+                'unsigned' => true,
+                'not null' => true,
+            ),
+            'bynder_id' => array(
+                'description' => 'Bynder asset unique identifier.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => true,
+                'default' => '',
+            ),
+            'fid' => array(
+                'description' => 'Drupal file identifier.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => true,
+                'default' => '',
+            ),
+            'nid' => array(
+                'description' => 'The node identifier.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => true,
+                'default' => '',
+            )
+        ),
+        'primary key' => array('id')
+    );
+    return $schema;
+}
+
+/**
  * Implements hook_uninstall().
  */
-function media_bynder_uninstall() {
-  variable_del('media_bynder_url');
-  variable_del('media_bynder_oauth_consumer');
-  variable_del('media_bynder_oauth_consumer_secret');
-  variable_del('media_bynder_oauth_token');
-  variable_del('media_bynder_oauth_token_secret');
+function media_bynder_uninstall()
+{
+    variable_del('media_bynder_url');
+    variable_del('media_bynder_oauth_consumer');
+    variable_del('media_bynder_oauth_consumer_secret');
+    variable_del('media_bynder_oauth_token');
+    variable_del('media_bynder_oauth_token_secret');
+    variable_del('media_bynder_derivatives');
+    variable_del('');
+
+    drupal_uninstall_schema("media_bynder");
 }

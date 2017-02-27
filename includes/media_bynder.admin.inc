@@ -118,7 +118,6 @@ function media_bynder_form($form, &$form_state)
         '#description' => t('Custom derivative name set up in Bynder config, allows cropping and resizing.'),
         '#required' => false
     );
-
     return system_settings_form($form);
 }
 
@@ -162,7 +161,6 @@ function media_bynder_batch_reload_derivatives_process(&$context)
     $derivatives = $context['results']['derivativesList'];
     $oldDerivatives = $context['results']['oldDerivatives'];
     $newDerivatives = array_diff((array)$derivatives, (array)$oldDerivatives);
-    $toStore = array_intersect((array)$derivatives, (array)$oldDerivatives);
 
     $context['results']['toRemove'] = array_diff((array)$oldDerivatives, (array)$derivatives);
 
@@ -192,7 +190,7 @@ function media_bynder_batch_reload_derivatives_process(&$context)
             }
         }
     }
-    variable_set('media_bynder_derivatives', serialize($toStore));
+    variable_set('media_bynder_derivatives', serialize($derivatives));
 }
 
 function media_bynder_batch_clean_image_styles(&$context)

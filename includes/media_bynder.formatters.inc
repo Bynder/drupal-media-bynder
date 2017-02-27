@@ -42,7 +42,7 @@ function media_bynder_file_formatter_image_view($file, $display, $langcode)
         $image_style = $display['settings']['image_style'];
         $valid_image_styles = image_style_options(false);
         $effect = $type = $idHash = false;
-        if($image_style) {
+        if ($image_style) {
             $effects = image_styles()[$image_style];
             foreach ($effects as $effect) {
                 if (is_array($effect)) {
@@ -94,9 +94,9 @@ function media_bynder_field_info_alter(&$info)
  */
 function media_bynder_image_effect_info()
 {
-    $customDerivative =  variable_get('media_bynder_custom_derivative', null);
+    $customDerivative = variable_get('media_bynder_custom_derivative', null);
     $effects = array();
-    if($customDerivative) {
+    if ($customDerivative) {
         $effects = array(
             'bynder_custom_resolution_crop' => array(
                 'label' => t('Bynder custom resolution crop'),
@@ -161,34 +161,66 @@ function media_bynder_custom_resolution_dimensions(array &$dimensions, array $da
  */
 function media_bynder_preprocess_image(&$vars)
 {
-    if (array_key_exists('uri', $vars)) {
-        $vars['path'] = $vars['uri'];
-    }
+    $bynderUrl = variable_get('media_bynder_url', '');
+    // Only do anything for Bynder images.
+    if ($bynderUrl != '' && strpos($vars['path'], $bynderUrl) !== false) {
+        if (array_key_exists('uri', $vars)) {
+            $vars['path'] = $vars['uri'];
+        }
+        if (!isset($vars['style_name'])) {
+            return false;
+        }
+        $image_styles = image_styles();
+        $styleName = str_replace('bynder_', '', $image_styles[$vars['style_name']]['name']);
+        $bynder_styles = unserialize(variable_get('media_bynder_derivatives'));
+        // Process custom Bynder derivatives
+        if (in_array($styleName, $bynder_styles)) {
 
-    if (!isset($vars['style_name'])) {
-        return false;
-    }
-    $image_styles = image_styles();
-    if (isset($image_styles[$vars['style_name']])) {
-        $image_style = $image_styles[$vars['style_name']];
-        if(!empty($image_style['effects'])) {
-            foreach ($image_style['effects'] as $effect_key => $effect) {
-                if (strpos($vars['path'],
-                        variable_get('media_bynder_url')) !== false && ($effect['name'] == 'bynder_custom_resolution_crop' || $effect['name'] == 'bynder_custom_resolution_extend' || $effect['name'] == 'bynder_custom_resolution_resize')
-                ) {
-                    $fragment_id = media_bynder_id_from_uri($vars['path']);
-                    if ($fragment_id) {
-                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
-                    } else {
-                        $fragment_id = media_bynder_id_from_url($vars['path']);
-                        $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
-                    }
-                    break;
+            $idHash = media_bynder_id_from_url($vars['path']);
+            $bynderEntity = db_select('bynder_media_entity', 'b')
+                ->fields('b')
+                ->condition('b.bynder_hash_id', $idHash, '=')
+                ->execute()
+                ->fetchAll();
+
+            if (!empty($bynderEntity)) {
+                $imageDerivatives = unserialize($bynderEntity[0]->derivatives);
+                if (isset($imageDerivatives[$styleName])) {
+                    $vars['path'] = $imageDerivatives[$styleName];
+                    return false;
                 }
             }
-        }
+
+            $customDerivative = variable_get('media_bynder_custom_derivative', '');
+            $image_style = $image_styles[$vars['style_name']];
+            // We only need to add special processing to "on-the-fly" derivatives
+            if (isset($customDerivative) && $customDerivative == $styleName) {
+
+                foreach ($image_style['effects'] as $effect_key => $effect) {
+                    if (strpos($vars['path'], variable_get('media_bynder_url')) !== false
+                        && ($effect['name'] == 'bynder_custom_resolution_crop'
+                            || $effect['name'] == 'bynder_custom_resolution_extend'
+                            || $effect['name'] == 'bynder_custom_resolution_resize')
+                    ) {
+                        $fragment_id = media_bynder_id_from_uri($vars['path']);
+                        if ($fragment_id) {
+                            $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
+                        } else {
+                            $fragment_id = media_bynder_id_from_url($vars['path']);
+                            $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
+                        }
+                        break;
+                    }
+                }
+
+            } // If it's a "normal derivative, we just need to link it to the file.
+            else {
+
+            }
+        } // Set other styles to use the webimage Bynder derivative.
         else {
-// TODO implement regular derivatives
+            $vars['path'] = $GLOBALS['base_url'] . '/' . drupal_get_path('module',
+                    'media_bynder') . '/assets/no-image.png';
         }
     }
     return false;

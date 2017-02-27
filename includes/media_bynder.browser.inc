@@ -76,6 +76,29 @@ function media_bynder_save_image($id, $form = null)
             );
         $file->is_new = true;
         field_attach_insert('media', $file);
+
+        // Save Bynder asset entry.
+        $bynderId = $selected_media['id'];
+        $name = $selected_media['name'];
+        $description = $selected_media['description'];
+        $derivatives = $selected_media['thumbnails'];
+        try {
+            db_insert('bynder_media_entity')
+                ->fields(array(
+                    'bynder_id' => $bynderId,
+                    'bynder_hash_id' => $idHash,
+                    'name' => $name,
+                    'description' => $description,
+                    'derivatives' => serialize($derivatives)
+                ))
+                ->execute();
+
+        }
+        catch (Exception $e) {
+            // Handle exception
+            var_dump($e);
+        }
+
         return array('success' => 1, 'message' => 'Successfully added media to Library', 'fid' => $file->fid);
     } else {
         return array('success' => 1, 'message' => 'Already exists in Library', 'fid' => $file->fid);

@@ -168,7 +168,6 @@ function validateIdHash($str)
 function media_bynder_uri_parse_style_url($uri)
 {
     $idHash = media_bynder_idHash_from_uri($uri);
-    var_dump($uri);die;
     return variable_get('media_bynder_url', '') . '/l/' . $idHash . '/original/';
 }
 
@@ -184,7 +183,6 @@ function validateBynderDrupalUrl($str)
 
 function customResolutionUrl($file, $width, $height, $effect, $prefix = false)
 {
-    var_dump($file);
     if (isset($file['idHash'])) {
         $idHash = $file['idHash'];
     } else {

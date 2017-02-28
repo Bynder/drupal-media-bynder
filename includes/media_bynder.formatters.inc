@@ -36,29 +36,12 @@ function media_bynder_file_formatter_info_alter(&$info)
 function media_bynder_file_formatter_image_view($file, $display, $langcode)
 {
     $scheme = file_uri_scheme($file->uri);
-
     if ($scheme == 'bynder') {
         $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
         $image_style = $display['settings']['image_style'];
-        $valid_image_styles = image_style_options(false);
-        $effect = $type = $idHash = false;
-        if ($image_style) {
-            $effects = image_styles()[$image_style];
-            foreach ($effects as $effect) {
-                if (is_array($effect)) {
-                    //array is not 0-based
-                    $effect = reset($effect);
-
-                    if (strpos($effect['name'], 'bynder') !== false) {
-                        break;
-                    }
-                }
-            }
-        }
-
         $element = array(
             '#theme' => 'image',
-            '#path' => $wrapper->getWebImagePath($type, $effect, $idHash),
+            '#path' => $wrapper->getWebImagePath($image_style),
             '#style_name' => $image_style,
             '#alt' => isset($file->override['attributes']['alt']) ? $file->override['attributes']['alt'] : $file->filename,
             '#suffix' => '<p class="media_object_type_' . ucfirst($file->type) . '">' . ucfirst($file->type) . '</p>'
@@ -163,65 +146,21 @@ function media_bynder_preprocess_image(&$vars)
 {
     $bynderUrl = variable_get('media_bynder_url', '');
     // Only do anything for Bynder images.
-    if ($bynderUrl != '' && strpos($vars['path'], $bynderUrl) !== false) {
+    if ($bynderUrl != '' && strpos($vars['path'], $bynderUrl) !== false || isValid('bynder_drupal_url', $vars['path']))
+    {
         if (array_key_exists('uri', $vars)) {
             $vars['path'] = $vars['uri'];
         }
         if (!isset($vars['style_name'])) {
-            return false;
+            $vars['style_name'] = '' ;
+        }
+        $idHash = media_bynder_id_from_url($vars['path']);
+        if(!$idHash) {
+            $idHash = media_bynder_idHash_from_uri($vars['path']);
         }
         $image_styles = image_styles();
-        $styleName = str_replace('bynder_', '', $image_styles[$vars['style_name']]['name']);
-        $bynder_styles = unserialize(variable_get('media_bynder_derivatives'));
-        // Process custom Bynder derivatives
-        if (in_array($styleName, $bynder_styles)) {
-
-            $idHash = media_bynder_id_from_url($vars['path']);
-            $bynderEntity = db_select('bynder_media_entity', 'b')
-                ->fields('b')
-                ->condition('b.bynder_hash_id', $idHash, '=')
-                ->execute()
-                ->fetchAll();
-
-            if (!empty($bynderEntity)) {
-                $imageDerivatives = unserialize($bynderEntity[0]->derivatives);
-                if (isset($imageDerivatives[$styleName])) {
-                    $vars['path'] = $imageDerivatives[$styleName];
-                    return false;
-                }
-            }
-
-            $customDerivative = variable_get('media_bynder_custom_derivative', '');
-            $image_style = $image_styles[$vars['style_name']];
-            // We only need to add special processing to "on-the-fly" derivatives
-            if (isset($customDerivative) && $customDerivative == $styleName) {
-
-                foreach ($image_style['effects'] as $effect_key => $effect) {
-                    if (strpos($vars['path'], variable_get('media_bynder_url')) !== false
-                        && ($effect['name'] == 'bynder_custom_resolution_crop'
-                            || $effect['name'] == 'bynder_custom_resolution_extend'
-                            || $effect['name'] == 'bynder_custom_resolution_resize')
-                    ) {
-                        $fragment_id = media_bynder_id_from_uri($vars['path']);
-                        if ($fragment_id) {
-                            $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect);
-                        } else {
-                            $fragment_id = media_bynder_id_from_url($vars['path']);
-                            $vars['path'] = media_bynder_embed_url($fragment_id, false, $effect, true);
-                        }
-                        break;
-                    }
-                }
-
-            } // If it's a "normal derivative, we just need to link it to the file.
-            else {
-
-            }
-        } // Set other styles to use the webimage Bynder derivative.
-        else {
-            $vars['path'] = $GLOBALS['base_url'] . '/' . drupal_get_path('module',
-                    'media_bynder') . '/assets/no-image.png';
-        }
+        $styleName = isset($image_styles[$vars['style_name']]) ? str_replace('bynder_', '', $image_styles[$vars['style_name']]['name']) : false;
+        $vars['path'] = media_bynder_embed_url($idHash, $styleName);
     }
     return false;
 }
@@ -294,44 +233,4 @@ function media_bynder_field_formatter_settings_summary($field, $instance, $view_
     );
 
     return $summary;
-}
-
-/**
- * Implements hook_field_formatter_view().
- * Returns the absolute URL for the custom calls
- */
-function media_bynder_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display)
-{
-    if ($display['type'] == 'media_bynder_absolute_url') {
-        $settings = $display['settings'];
-        //global Drupal function
-        $effects = image_styles()[$settings['image_style']];
-
-        foreach ($effects as $effect) {
-            if (is_array($effect)) {
-                //array is not 0-based
-                $effect = reset($effect);
-                $effect_name = $effect['name'];
-
-                if (strpos($effect_name, 'bynder') !== false) {
-                    $effect_width = $effect['data']['width'];
-                    $effect_height = $effect['data']['height'];
-
-                    if (!empty($items)) {
-                        $media_item = array(
-                            'idHash' => media_bynder_idHash_from_uri($items[0]['uri'])
-                        );
-
-                        $element = array();
-                        // global function from media_bynder.utils.inc
-                        $image_url = customResolutionUrl($media_item, $effect_width, $effect_height, $effect_name);
-                        $element[0]['#markup'] = $image_url;
-
-                        return $element;
-                    }
-                }
-            }
-        }
-    }
-    return false;
 }

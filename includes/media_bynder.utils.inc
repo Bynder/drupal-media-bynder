@@ -40,40 +40,34 @@ function media_bynder_get_object_by_id($id)
  * @todo add support for type and effect
  */
 
-function media_bynder_embed_url($fragment_id, $type = false, $effects = false, $idHash = false)
+function media_bynder_embed_url($idHash, $image_style = false)
 {
-    $url = '';
-    $error = false;
-    if (!$type) {
-        $type = 'bynder_custom';
-    }
-    try {
-        if (isset($fragment_id) && !$idHash) {
-            $media_item = media_bynder_get_object_by_id($fragment_id);
-        } else {
-            $media_item = ['idHash' => $fragment_id];
-        }
+    $bynderEntity = db_select('bynder_media_entity', 'b')
+        ->fields('b')
+        ->condition('b.bynder_hash_id', $idHash, '=')
+        ->execute()
+        ->fetchAll();
+    if (!empty($bynderEntity)) {
+        $bynder_styles = unserialize(variable_get('media_bynder_derivatives'));
+        $imageDerivatives = unserialize($bynderEntity[0]->derivatives);
+        $styleName = str_replace('bynder_', '', $image_style);
 
-        if ($effects) {
-            $url = customResolutionUrl($media_item, $effects['data']['width'], $effects['data']['height'],
-                $effects['name']);
-        } else {
-            if (isset($media_item['thumbnails'][$type])) {
-                $url = $media_item['thumbnails'][$type];
+        // Process custom Bynder derivatives
+        if (in_array($styleName, $bynder_styles)) {
+            if (isset($imageDerivatives[$styleName])) {
+                return $imageDerivatives[$styleName];
             }
         }
-        if (!$url) {
-            //fallback image
-            $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
+        // Check if we have the webimage default derivative for that image.
+        elseif(isset($imageDerivatives['webimage'])){
+            return $imageDerivatives['webimage'];
         }
-    } catch (Exception $e) {
-        watchdog('php', $e->getMessage());
-        $error = true;
     }
-    if (!$url || $error) {
-        $url = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'media_bynder') . '/assets/no-image.png';
+    // If everything else fails we default to image not found.
+    else {
+        return $GLOBALS['base_url'] . '/' . drupal_get_path('module',
+            'media_bynder') . '/assets/no-image.png';
     }
-    return $url;
 }
 
 /**

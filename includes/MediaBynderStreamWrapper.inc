@@ -15,22 +15,12 @@ class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper
     }
 
     /**
-     * Function getOriginalThumbnailPath().
-     * @return string
-     *   The path to the thumbnail.
-     */
-    public function getOriginalThumbnailPath()
-    {
-        return @media_bynder_embed_url($this->parameters['f']);
-    }
-
-    /**
      * Function getWebimagePath().
      * @return string
      *   The path to the image.
      */
-    public function getWebimagePath($type = false, $effects = false, $idHash = false)
+    public function getWebimagePath($image_style)
     {
-        return @media_bynder_embed_url($this->parameters['f'], $type, $effects, $idHash);
+        return @media_bynder_embed_url($this->parameters['i'], $image_style);
     }
 }

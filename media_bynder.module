@@ -125,7 +125,7 @@ function media_bynder_library()
     $info = system_get_info('module', 'media_bynder');
 
     $common = array(
-        'website' => 'http://www.getbynder.com',
+        'website' => 'http://www.bynder.com',
         'version' => !empty($info['version']) ? $info['version'] : '7.x-1.x',
     );
 

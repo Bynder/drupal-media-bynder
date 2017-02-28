@@ -25,8 +25,7 @@ class MediaBynderBrowser extends MediaBrowserPlugin
     public function view()
     {
         $build = array();
-        $params = $this->params;
-        $build['form'] = drupal_get_form('media_bynder_add', $params);
+        $build['form'] = drupal_get_form('media_bynder_add', $this->params);
 
         return $build;
     }

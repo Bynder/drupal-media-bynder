@@ -86,7 +86,7 @@ function media_bynder_id_from_uri($uri) {
 function media_bynder_id_from_url($url) {
     $parts = explode('/', $url);
     foreach ($parts as $part_key => $part) {
-        if ($part == 'l') {
+        if ($part == 'm') {
             if (count($parts) >= ($part_key + 1)) {
                 return $parts[$part_key + 1];
             }
@@ -138,7 +138,7 @@ function validateIdHash($str) {
 
 function media_bynder_uri_parse_style_url($uri) {
     $idHash = media_bynder_idHash_from_uri($uri);
-    return variable_get('media_bynder_url', '')  .  '/l/' .  $idHash . '/original/';
+    return variable_get('media_bynder_url', '')  .  '/m/' .  $idHash . '/original/';
 }
 
 function validateBynderDrupalUrl($str) {

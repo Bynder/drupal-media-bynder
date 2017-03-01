@@ -158,7 +158,7 @@
 
             if(media_library_mode){
                 $.ajax({
-                    url: '/?q=admin/content/media/add/media_bynder',
+                    url: '/admin/content/media/add/media_bynder',
                     type: 'POST',
                     dataType: 'json',
                     data: {

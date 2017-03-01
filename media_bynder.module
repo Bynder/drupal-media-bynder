@@ -5,20 +5,18 @@
  * A block module that displays recent blog and forum posts.
  */
 
-/**
- * load configuration settings
- */
-include_once dirname(__FILE__) . '/includes/media_bynder.utils.inc';
+require_once dirname(__FILE__) . '/includes/media_bynder.browser.inc';
+require_once dirname(__FILE__) . '/includes/media_bynder.utils.inc';
 
 // Hooks and callbacks for integrating with File Entity module for display.
 require_once dirname(__FILE__) . '/includes/media_bynder.formatters.inc';
-
 require_once dirname(__FILE__) . '/includes/media_bynder.admin.inc';
 
 /**
  * Implements hook_stream_wrappers().
  */
-function media_bynder_stream_wrappers() {
+function media_bynder_stream_wrappers()
+{
     return array(
         'bynder' => array(
             'name' => t('Bynder media'),
@@ -32,22 +30,23 @@ function media_bynder_stream_wrappers() {
 /**
  * Implements hook_media_browser_plugin_info().
  */
-function media_bynder_media_browser_plugin_info() {
-  $info['media_bynder'] = array(
-    'title' => t('Bynder'),
-    'class' => 'MediaBynderBrowser'
-  );
+function media_bynder_media_browser_plugin_info()
+{
+    $info['media_bynder'] = array(
+        'title' => t('Bynder'),
+        'class' => 'MediaBynderBrowser'
+    );
 
-  return $info;
+    return $info;
 }
-
 
 /**
  * Implements hook_help().
  *
  * Displays help and module information.
  */
-function media_bynder_help($path, $arg) {
+function media_bynder_help($path, $arg)
+{
     switch ($path) {
         case "admin/advanced_help#media_bynder":
             return '<p>' . t("Advanced Help: Displays links to nodes created on this date") . '</p>';
@@ -60,19 +59,21 @@ function media_bynder_help($path, $arg) {
 /**
  * Implements hook_permission().
  */
-function media_bynder_permission() {
-  return array(
-    'administer media bynder' => array(
-      'title' => t('Administer Media: Bynder'),
-      'description' => t('Configure Bynder API connection settings.'),
-    ),
-  );
+function media_bynder_permission()
+{
+    return array(
+        'administer media bynder' => array(
+            'title' => t('Administer Media: Bynder'),
+            'description' => t('Configure Bynder API connection settings.'),
+        ),
+    );
 }
 
 /**
  * Implements hook menu().
  */
-function media_bynder_menu() {
+function media_bynder_menu()
+{
     $items = array();
     $items['admin/config/media/media_bynder'] = array(
         'title' => 'Bynder Settings',
@@ -118,48 +119,49 @@ function media_bynder_menu() {
 /**
  * Implements hook_library().
  */
-function media_bynder_library() {
-  $path = drupal_get_path('module', 'media_bynder');
-  $info = system_get_info('module', 'media_bynder');
+function media_bynder_library()
+{
+    $path = drupal_get_path('module', 'media_bynder');
+    $info = system_get_info('module', 'media_bynder');
 
-  $common = array(
-    'website' => 'http://www.getbynder.com',
-    'version' => !empty($info['version']) ? $info['version'] : '7.x-1.x',
-  );
+    $common = array(
+        'website' => 'http://www.bynder.com',
+        'version' => !empty($info['version']) ? $info['version'] : '7.x-1.x',
+    );
 
-  // Powers the 'Add media from Bynder' page.
-  $libraries['media_bynder_administration'] = array(
-    'title' => 'Media: Bynder Administration',
-    'js' => array(
-      $path . '/js/media_bynder.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -5,
-      ),
-    ),
-    'css' => array(
-      $path . '/media_bynder.css' => array(),
-    ),
-    'dependencies' => array(
-      array('media_bynder', 'spin'),
-    ),
-  );
+    // Powers the 'Add media from Bynder' page.
+    $libraries['media_bynder_administration'] = array(
+        'title' => 'Media: Bynder Administration',
+        'js' => array(
+            $path . '/js/media_bynder.js' => array(
+                'group' => JS_LIBRARY,
+                'weight' => -5,
+            ),
+        ),
+        'css' => array(
+            $path . '/media_bynder.css' => array(),
+        ),
+        'dependencies' => array(
+            array('media_bynder', 'spin'),
+        ),
+    );
 
-  // Generates animated CSS3 loading spinners.
-  $libraries['spin'] = array(
-    'title' => 'Spin',
-    'js' => array(
-      $path . '/js/spin.min.js' => array(
-        'group' => JS_DEFAULT,
-      ),
-    ),
-  );
+    // Generates animated CSS3 loading spinners.
+    $libraries['spin'] = array(
+        'title' => 'Spin',
+        'js' => array(
+            $path . '/js/spin.min.js' => array(
+                'group' => JS_DEFAULT,
+            ),
+        ),
+    );
 
-  // Add common information to each library.
-  foreach ($libraries as &$library) {
-    $library += $common;
-  }
+    // Add common information to each library.
+    foreach ($libraries as &$library) {
+        $library += $common;
+    }
 
-  return $libraries;
+    return $libraries;
 }
 
 /**
@@ -168,7 +170,8 @@ function media_bynder_library() {
  * @param unknown $file
  *   the file
  */
-function media_bynder_file_presave($file) {
+function media_bynder_file_presave($file)
+{
     if (stristr($file->uri, 'bynder://')) {
         if (($file->type) == 'image') {
             $file->filemime = 'image/bynder';

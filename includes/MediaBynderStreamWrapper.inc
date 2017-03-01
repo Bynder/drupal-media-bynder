@@ -1,32 +1,26 @@
 <?php
+
 /**
  * @file
  * media_youtube/includes/MediaBynderStreamWrapper.inc
  *
  * Create a Bynder Stream Wrapper class for the Media/Resource module.
  */
+class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper
+{
 
-class MediaBynderStreamWrapper extends MediaReadOnlyStreamWrapper{
-
-    public function interpolateUrl() {
-       return @media_bynder_uri_parse_style_url($this->uri);
+    public function interpolateUrl()
+    {
+        return @media_bynder_uri_parse_style_url($this->uri);
     }
 
     /**
-     * Function getOriginalThumbnailPath().
+     * Function getWebimagePath().
      * @return string
-     *   The path to the thumbnail.
+     *   The path to the image.
      */
-    public function getOriginalThumbnailPath() {
-        return @media_bynder_embed_url($this->parameters['f']);
-    }
-
-    /**
-     * Function getOriginalThumbnailPath().
-     * @return string
-     *   The path to the thumbnail.
-     */
-    public function getWebimagePath($type=FALSE, $effects=FALSE, $idHash=FALSE) {
-        return @media_bynder_embed_url($this->parameters['f'], $type, $effects, $idHash);
+    public function getWebimagePath($image_style)
+    {
+        return @media_bynder_embed_url($this->parameters['i'], $image_style);
     }
 }

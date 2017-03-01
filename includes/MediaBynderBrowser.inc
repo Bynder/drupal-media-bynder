@@ -9,22 +9,24 @@
 /**
  * Browser plugin for Bynder files.
  */
-class MediaBynderBrowser extends MediaBrowserPlugin {
-  /**
-   * Implements MediaBrowserPluginInterface::access().
-   */
-  public function access($account = NULL) {
-    return media_internet_access($account);
-  }
+class MediaBynderBrowser extends MediaBrowserPlugin
+{
+    /**
+     * Implements MediaBrowserPluginInterface::access().
+     */
+    public function access($account = null)
+    {
+        return media_internet_access($account);
+    }
 
-  /**
-   * Implements MediaBrowserPlugin::view().
-   */
-  public function view() {
-    $build = array();
-    $params = $this->params;
-    $build['form'] = drupal_get_form('media_bynder_add', $params);
+    /**
+     * Implements MediaBrowserPlugin::view().
+     */
+    public function view()
+    {
+        $build = array();
+        $build['form'] = drupal_get_form('media_bynder_add', $this->params);
 
-    return $build;
-  }
+        return $build;
+    }
 }

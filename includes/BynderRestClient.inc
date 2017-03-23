@@ -13,7 +13,7 @@ class BynderRestClient {
 
     public function __construct($baseRestUrl, $oauth_consumer,
                                 $oauth_consumer_secret, $oauth_token,
-                                $oauth_token_secret) {
+                                $oauth_token_secret, $proxyUrl = null) {
         $this->baseRestUrl = $baseRestUrl;
         $this->oauth = array(
             'oauth_consumer' => $oauth_consumer,
@@ -28,6 +28,10 @@ class BynderRestClient {
             CURLOPT_SSL_VERIFYHOST => FALSE,
             CURLOPT_HEADER => false
         );
+
+        if(isset($proxyUrl)) {
+            $this->options[CURLOPT_PROXY] = $proxyUrl;
+        }
     }
 
     public function test() {

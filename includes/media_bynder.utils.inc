@@ -10,11 +10,12 @@
  */
 function media_bynder_rest_client() {
     return new BynderRestClient(
-      variable_get('media_bynder_url', '') . '/api/v4',
-      variable_get('media_bynder_oauth_consumer', ''),
-      variable_get('media_bynder_oauth_consumer_secret', ''),
-      variable_get('media_bynder_oauth_token', ''),
-      variable_get('media_bynder_oauth_token_secret', '')
+        variable_get('media_bynder_url', '') . '/api/v4',
+        variable_get('media_bynder_oauth_consumer', ''),
+        variable_get('media_bynder_oauth_consumer_secret', ''),
+        variable_get('media_bynder_oauth_token', ''),
+        variable_get('media_bynder_oauth_token_secret', ''),
+        variable_get('media_bynder_proxy_url', '')
     );
 }
 

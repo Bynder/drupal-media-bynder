@@ -748,6 +748,25 @@ function media_bynder_form($form, &$form_state) {
         '#required' => FALSE
     );
 
+
+    $form['media_bynder_settings']['media_bynder_proxy_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Optional proxy settings'),
+    );
+
+
+    $form['media_bynder_settings']['media_bynder_proxy_settings']['media_bynder_proxy_url'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Proxy url'),
+        '#default_value' => variable_get('media_bynder_proxy_url', ''),
+        '#size' => 50,
+        '#description' => t('Optional proxy url to be used in oauth requests. Please use the full proxy url with 
+            the desired port, ex.: "https://my-proxy-domain.com:1234'),
+        '#required' => FALSE
+    );
+
+
+
     return system_settings_form($form);
 }
 

@@ -1,4 +1,12 @@
-drupal-media-bynder
+IMPORTANT DISCLAIMER
+====================
+This module has now been deprecated and is no longer supported or maintained by Bynder. The new version of the module gor both Drupal 7 and 8 has been released and can be found in the [Bynder Drupal project page](https://www.drupal.org/project/bynder).
+
+Please refer to the project page for the latest source code, documentation and to report any issues/requests.
+
+
+
+DEPRECATED - drupal-media-bynder
 ====================
 
 This configuration guide is based on the standard drupal installation, the current version of drupal is 7.x. Any issues can be reported to [github] (https://github.com/Bynder/drupal-media-bynder/issues).

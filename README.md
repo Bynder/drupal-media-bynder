@@ -1,4 +1,12 @@
-drupal-media-bynder
+IMPORTANT DISCLAIMER
+====================
+This module has now been deprecated and is no longer supported or maintained by Bynder. The new version of the module gor both Drupal 7 and 8 has been released and can be found in the [Bynder Drupal project page](https://www.drupal.org/project/bynder).
+
+Please refer to the project page for the latest source code, documentation and to report any issues/requests.
+
+
+
+DEPRECATED - drupal-media-bynder
 ====================
 
 This configuration guide is based on the standard drupal installation, the current version of drupal is 7.x. Any issues can be reported to [github] (https://github.com/Bynder/drupal-media-bynder/issues).
@@ -21,7 +29,7 @@ Upload the following required modules into the folder "sites/all/modules", some 
 Versions matter!
 
 *   [Media 2.x] (https://drupal.org/project/media)
-*   [OAuth 3.x] (https://drupal.org/project/oauth)
+*   [OAuth 1.0 3.x] (https://drupal.org/project/oauth)
 *   [File Entity 2.x] (https://www.drupal.org/project/file_entity)
 *   [WYSIWYG 2.x] (https://www.drupal.org/project/wysiwyg)
 *   [CTools 1.x] (https://www.drupal.org/project/ctools)

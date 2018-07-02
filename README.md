@@ -29,7 +29,7 @@ Upload the following required modules into the folder "sites/all/modules", some 
 Versions matter!
 
 *   [Media 2.x] (https://drupal.org/project/media)
-*   [OAuth 3.x] (https://drupal.org/project/oauth)
+*   [OAuth 1.0 3.x] (https://drupal.org/project/oauth)
 *   [File Entity 2.x] (https://www.drupal.org/project/file_entity)
 *   [WYSIWYG 2.x] (https://www.drupal.org/project/wysiwyg)
 *   [CTools 1.x] (https://www.drupal.org/project/ctools)
